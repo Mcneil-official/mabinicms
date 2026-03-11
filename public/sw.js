@@ -5,8 +5,8 @@ const CACHE_NAME = "health-workers-v1";
 const RUNTIME_CACHE = "health-workers-runtime-v1";
 const OFFLINE_URL = "/offline.html";
 
-// Static assets to cache on install
-const PRECACHE_URLS = ["/", "/offline.html", "/manifest.json", "/favicon.ico"];
+// Static assets to cache on install (only truly static files)
+const PRECACHE_URLS = ["/offline.html", "/manifest.json", "/favicon.ico"];
 
 // Cache strategies
 const CACHE_STRATEGIES = {
@@ -22,10 +22,17 @@ self.addEventListener("install", (event) => {
   console.log("[ServiceWorker] Installing...");
 
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[ServiceWorker] Caching critical assets");
-      return cache.addAll(PRECACHE_URLS);
-    }),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => {
+        console.log("[ServiceWorker] Caching critical assets");
+        // Use individual cache.add calls so one failure doesn't block the rest
+        return Promise.allSettled(
+          PRECACHE_URLS.map((url) => cache.add(url).catch((err) => {
+            console.warn("[ServiceWorker] Failed to cache:", url, err);
+          }))
+        );
+      }),
   );
 
   // Force service worker to become active immediately
@@ -230,6 +237,7 @@ async function syncOfflineQueue() {
  * Message event - handle client messages
  */
 self.addEventListener("message", (event) => {
+  if (!event.data) return;
   const { type, data } = event.data;
 
   if (type === "SKIP_WAITING") {

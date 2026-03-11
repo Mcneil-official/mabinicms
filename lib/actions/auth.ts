@@ -26,11 +26,12 @@ export async function loginAction(formData: {
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Fetch user from public.users table
+    // Fetch user from public.users table (exclude workers — they must use the worker login)
     const { data: user, error } = await supabase
       .from("users")
       .select("*")
       .eq("username", username)
+      .neq("user_role", "workers")
       .single();
 
     if (error || !user) {

@@ -24,8 +24,6 @@ import {
   Menu,
   X,
   LogOut,
-  User,
-  Settings,
   Stethoscope,
   QrCode,
 } from "lucide-react";
@@ -219,15 +217,6 @@ export function WorkerDashboardLayout({
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 focus:text-red-600"
