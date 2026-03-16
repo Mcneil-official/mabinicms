@@ -35,7 +35,21 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
-    // Role-based route protection
+    // Role-based route protection: workers vs LGU dashboard separation
+    const isWorkerDashboard = pathname.startsWith("/dashboard-workers");
+    const isLguDashboard = pathname.startsWith("/dashboard") && !isWorkerDashboard;
+
+    // Workers must use /dashboard-workers, not /dashboard
+    if (isLguDashboard && session.user.role === "workers") {
+      return NextResponse.redirect(new URL("/dashboard-workers", request.url));
+    }
+
+    // LGU users (non-workers) must use /dashboard, not /dashboard-workers
+    if (isWorkerDashboard && session.user.role !== "workers") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // Sub-route protection
     const healthWorkerRoute = pathname.startsWith("/dashboard/health-workers");
     const staffRoute = pathname.startsWith("/dashboard/staff");
 
@@ -66,8 +80,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - sw.js (service worker)
+     * - manifest.json (PWA manifest)
+     * - offline.html (offline fallback)
      * - public folder
      */
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.json|offline\\.html|public).*)",
   ],
 };

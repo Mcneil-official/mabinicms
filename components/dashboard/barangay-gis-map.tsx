@@ -28,6 +28,7 @@ import {
   getBarangayCenter,
   type BarangayGeoFeature,
 } from "@/lib/utils/mock-barangay-geojson";
+import { fallbackBarangayHealthData } from "./fallback-barangay-health-data";
 import { ChevronDown, FlaskConical } from "lucide-react";
 
 // Create custom map pin marker icons based on coverage level
@@ -119,6 +120,9 @@ function GisMapContent({
 
     // Create a map from barangay names to their data
     const dataMap = new Map(data.map((d) => [d.barangay, d]));
+    const fallbackMap = new Map(
+      fallbackBarangayHealthData.map((d) => [d.barangay, d]),
+    );
 
     // Add markers for each barangay
     mockBarangayGeoJSON.features.forEach((feature) => {
@@ -126,13 +130,16 @@ function GisMapContent({
       let barangayData = dataMap.get(barangayName);
 
       if (!barangayData) {
-        // Use mock data if not provided
-        barangayData = {
-          barangay: barangayName,
-          vaccination_coverage: Math.floor(Math.random() * 100),
-          pending_interventions: Math.floor(Math.random() * 20),
-          total_residents: Math.floor(Math.random() * 5000 + 1000),
-        };
+        barangayData =
+          fallbackMap.get(barangayName) || {
+            barangay: barangayName,
+            vaccination_coverage: 0,
+            pending_interventions: 0,
+            total_residents: 0,
+            maternal_health_visits: 0,
+            senior_citizens_assisted: 0,
+            last_updated: new Date().toISOString(),
+          };
       }
 
       const coverage = barangayData.vaccination_coverage;
