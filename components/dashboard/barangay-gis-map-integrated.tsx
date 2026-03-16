@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { BarangayVaccinationData } from "./barangay-gis-map";
 import { BarangayGisMap } from "./barangay-gis-map";
+import { fallbackBarangayHealthData } from "./fallback-barangay-health-data";
 import {
   BarangayStatsPanel,
   type BarangayStatsData,
@@ -11,7 +12,7 @@ import { BarangayVaccinationLegend } from "./barangay-vaccination-legend";
 
 interface BarangayGisMapIntegratedProps {
   data?: BarangayVaccinationData[];
-  useMockData?: boolean;
+  useFallbackData?: boolean;
   title?: string;
   description?: string;
   mapHeight?: string;
@@ -20,51 +21,11 @@ interface BarangayGisMapIntegratedProps {
 }
 
 /**
- * Mock vaccination data for demonstration
+ * Fallback vaccination data for initial dashboard use
  * Using all 27 actual barangays from Naga City, Bicol
  */
-function generateMockData(): BarangayVaccinationData[] {
-  const barangays = [
-    "Abella",
-    "Bagumbayan Norte",
-    "Bagumbayan Sur",
-    "Balatas",
-    "Calauag",
-    "Cararayan",
-    "Carolina",
-    "Concepcion Pequeña",
-    "Concepcion Grande",
-    "Dayangdang",
-    "Del Rosario",
-    "Dinaga",
-    "Igualdad Interior",
-    "Lerma",
-    "Liboton",
-    "Mabolo",
-    "Pangpang",
-    "Panicuason",
-    "Peñafrancia",
-    "Sabang",
-    "San Felipe",
-    "San Francisco (Poblacion)",
-    "San Isidro",
-    "Santa Cruz",
-    "Santo Niño",
-    "Tabuco",
-    "Triangulo",
-  ];
-
-  return barangays.map((barangay) => ({
-    barangay,
-    vaccination_coverage: Math.floor(Math.random() * 100),
-    pending_interventions: Math.floor(Math.random() * 30),
-    total_residents: Math.floor(Math.random() * 8000 + 2000),
-    maternal_health_visits: Math.floor(Math.random() * 50),
-    senior_citizens_assisted: Math.floor(Math.random() * 100),
-    last_updated: new Date(
-      Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
-    ).toISOString(),
-  }));
+function getFallbackData(): BarangayVaccinationData[] {
+  return fallbackBarangayHealthData.map((record) => ({ ...record }));
 }
 
 /**
@@ -74,14 +35,14 @@ function generateMockData(): BarangayVaccinationData[] {
  * It handles state management for selected barangays and provides a complete user experience.
  *
  * Usage:
- * <BarangayGisMapIntegrated useMockData={true} />
+ * <BarangayGisMapIntegrated useFallbackData={true} />
  *
  * or with real data:
  * <BarangayGisMapIntegrated data={realVaccinationData} />
  */
 export function BarangayGisMapIntegrated({
   data,
-  useMockData = true,
+  useFallbackData = true,
   title = "Naga City Barangay Health Coverage",
   description = "Interactive marker-based visualization of vaccination coverage across Naga City, Bicol barangays",
   mapHeight = "h-[600px]",
@@ -92,8 +53,8 @@ export function BarangayGisMapIntegrated({
     useState<BarangayStatsData | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  // Use mock data if none provided
-  const displayData = data || (useMockData ? generateMockData() : []);
+  // Use realistic fallback records if live data is unavailable.
+  const displayData = data || (useFallbackData ? getFallbackData() : []);
 
   const handleBarangaySelect = (
     barangayName: string,

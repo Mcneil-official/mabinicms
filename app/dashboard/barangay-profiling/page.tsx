@@ -145,10 +145,10 @@ export default function BarangayProfilingPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-            Barangay Profiling
+            Barangay & Pregnancy Profiling
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Manage barangay-level demographic and health-related member records
+            Manage merged barangay profiling, pregnancy details, and health histories
           </p>
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function BarangayProfilingPage() {
           if (!v) handleFormCancel();
         }}
       >
-        <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] lg:w-[90vw] max-w-6xl sm:max-w-6xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingProfile ? "Edit Barangay Profile" : "New Barangay Profile"}

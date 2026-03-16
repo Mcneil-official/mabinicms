@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -63,6 +65,57 @@ export interface BarangayProfileFormData {
   permanentProvince: string;
   email: string;
   mobile: string;
+
+  // Part 4 – Pregnancy + Medical/Surgical History
+  isPregnant: "yes" | "no" | "";
+  pregnancyMonths: string;
+  gravida: string;
+  para: string;
+  lmp: string;
+  edd: string;
+  prenatalCheckupDate: string;
+  pregnancyRiskLevel: string;
+  pregnancyRemarks: string;
+  hasHypertension: string;
+  hasDiabetes: string;
+  hasAsthma: string;
+  hasHeartDisease: string;
+  pastSurgeries: string;
+  currentMedications: string;
+  allergies: string;
+  hospitalizationHistory: string;
+  pastMedicalHistory: string;
+  pmhSpecifyAllergy: string;
+  pmhSpecifyOrganCancer: string;
+  pmhSpecifyHepatitisType: string;
+  pmhHighestBloodPressure: string;
+  pmhSpecifyPulmonaryTbCategory: string;
+  pmhSpecifyExtrapulmonaryTbCategory: string;
+  pmhOthersSpecify: string;
+  pastSurgicalHistory: string;
+
+  // Part 5 – Family & Personal History
+  familyHypertension: string;
+  familyDiabetes: string;
+  familyAsthma: string;
+  familyCancer: string;
+  familyHistory: string;
+  fhSpecifyAllergy: string;
+  fhSpecifyOrganCancer: string;
+  fhSpecifyHepatitisType: string;
+  fhHighestBloodPressure: string;
+  fhSpecifyPulmonaryTbCategory: string;
+  fhSpecifyExtrapulmonaryTbCategory: string;
+  fhOthersSpecify: string;
+  smokingStatus: string;
+  smokingPacksPerYear: string;
+  alcoholIntake: string;
+  alcoholBottlesPerDay: string;
+  illicitDrugs: string;
+  sexuallyActive: string;
+  exerciseFrequency: string;
+  dietaryPattern: string;
+  personalHistoryNotes: string;
 }
 
 const defaultFormData: BarangayProfileFormData = {
@@ -105,7 +158,108 @@ const defaultFormData: BarangayProfileFormData = {
   permanentProvince: "",
   email: "",
   mobile: "",
+  isPregnant: "",
+  pregnancyMonths: "",
+  gravida: "",
+  para: "",
+  lmp: "",
+  edd: "",
+  prenatalCheckupDate: "",
+  pregnancyRiskLevel: "",
+  pregnancyRemarks: "",
+  hasHypertension: "",
+  hasDiabetes: "",
+  hasAsthma: "",
+  hasHeartDisease: "",
+  pastSurgeries: "",
+  currentMedications: "",
+  allergies: "",
+  hospitalizationHistory: "",
+  pastMedicalHistory: "",
+  pmhSpecifyAllergy: "",
+  pmhSpecifyOrganCancer: "",
+  pmhSpecifyHepatitisType: "",
+  pmhHighestBloodPressure: "",
+  pmhSpecifyPulmonaryTbCategory: "",
+  pmhSpecifyExtrapulmonaryTbCategory: "",
+  pmhOthersSpecify: "",
+  pastSurgicalHistory: "",
+  familyHypertension: "",
+  familyDiabetes: "",
+  familyAsthma: "",
+  familyCancer: "",
+  familyHistory: "",
+  fhSpecifyAllergy: "",
+  fhSpecifyOrganCancer: "",
+  fhSpecifyHepatitisType: "",
+  fhHighestBloodPressure: "",
+  fhSpecifyPulmonaryTbCategory: "",
+  fhSpecifyExtrapulmonaryTbCategory: "",
+  fhOthersSpecify: "",
+  smokingStatus: "",
+  smokingPacksPerYear: "",
+  alcoholIntake: "",
+  alcoholBottlesPerDay: "",
+  illicitDrugs: "",
+  sexuallyActive: "",
+  exerciseFrequency: "",
+  dietaryPattern: "",
+  personalHistoryNotes: "",
 };
+
+const HISTORY_OPTIONS = [
+  "allergy",
+  "asthma",
+  "cancer",
+  "cerebrovascular_disease",
+  "coronary_artery_disease",
+  "diabetes_mellitus",
+  "emphysema",
+  "epilepsy_seizure_disorder",
+  "hepatitis",
+  "hyperlipidemia",
+  "hypertension",
+  "peptic_ulcer",
+  "pneumonia",
+  "thyroid_disease",
+  "pulmonary_tuberculosis",
+  "extrapulmonary_tuberculosis",
+  "urinary_tract_infection",
+  "mental_illness",
+  "others",
+  "none",
+] as const;
+
+const HISTORY_OPTION_LABELS: Record<(typeof HISTORY_OPTIONS)[number], string> = {
+  allergy: "Allergy",
+  asthma: "Asthma",
+  cancer: "Cancer",
+  cerebrovascular_disease: "Cerebrovascular disease",
+  coronary_artery_disease: "Coronary artery disease",
+  diabetes_mellitus: "Diabetes Mellitus",
+  emphysema: "Emphysema",
+  epilepsy_seizure_disorder: "Epilepsy/Seizure Disorder",
+  hepatitis: "Hepatitis",
+  hyperlipidemia: "Hyperlipidemia",
+  hypertension: "Hypertension",
+  peptic_ulcer: "Peptic ulcer",
+  pneumonia: "Pneumonia",
+  thyroid_disease: "Thyroid disease",
+  pulmonary_tuberculosis: "Pulmonary tuberculosis",
+  extrapulmonary_tuberculosis: "Extrapulmonary tuberculosis",
+  urinary_tract_infection: "Urinary tract infection",
+  mental_illness: "Mental illness",
+  others: "Others",
+  none: "None",
+};
+
+function parseHistorySelections(value: string) {
+  return new Set(value.split("|").map((v) => v.trim()).filter(Boolean));
+}
+
+function stringifyHistorySelections(values: Set<string>) {
+  return Array.from(values).join("|");
+}
 
 // ─── Helper components ──────────────────────────────────────────────────────
 
@@ -663,15 +817,503 @@ function Part3({
   );
 }
 
+// ─── Part 4 ─────────────────────────────────────────────────────────────────
+
+function Part4({
+  data,
+  onChange,
+}: {
+  data: BarangayProfileFormData;
+  onChange: (field: keyof BarangayProfileFormData, value: string) => void;
+}) {
+  const isPregnant = data.isPregnant === "yes";
+  const selectedPastMedical = parseHistorySelections(data.pastMedicalHistory);
+
+  const togglePastMedical = (key: (typeof HISTORY_OPTIONS)[number], checked: boolean) => {
+    const next = new Set(selectedPastMedical);
+
+    if (checked) {
+      if (key === "none") {
+        next.clear();
+        next.add("none");
+      } else {
+        next.delete("none");
+        next.add(key);
+      }
+    } else {
+      next.delete(key);
+    }
+
+    onChange("pastMedicalHistory", stringifyHistorySelections(next));
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-blue-700 dark:text-blue-400">
+            Pregnancy Profiling (Merged)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <FieldGroup label="Currently Pregnant?" required>
+            <Select
+              value={data.isPregnant}
+              onValueChange={(v) =>
+                onChange("isPregnant", v as BarangayProfileFormData["isPregnant"])
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </FieldGroup>
+
+          {isPregnant && (
+            <>
+              <FieldGroup label="AOG (Months)">
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={data.pregnancyMonths}
+                  onChange={(e) => onChange("pregnancyMonths", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="Gravida">
+                <Input
+                  type="number"
+                  min={0}
+                  value={data.gravida}
+                  onChange={(e) => onChange("gravida", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="Para">
+                <Input
+                  type="number"
+                  min={0}
+                  value={data.para}
+                  onChange={(e) => onChange("para", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="LMP">
+                <Input
+                  type="date"
+                  value={data.lmp}
+                  onChange={(e) => onChange("lmp", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="EDD">
+                <Input
+                  type="date"
+                  value={data.edd}
+                  onChange={(e) => onChange("edd", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="Last Prenatal Check-up Date">
+                <Input
+                  type="date"
+                  value={data.prenatalCheckupDate}
+                  onChange={(e) => onChange("prenatalCheckupDate", e.target.value)}
+                />
+              </FieldGroup>
+              <FieldGroup label="Pregnancy Risk Level">
+                <Select
+                  value={data.pregnancyRiskLevel}
+                  onValueChange={(v) => onChange("pregnancyRiskLevel", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select risk level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low Risk</SelectItem>
+                    <SelectItem value="moderate">Moderate Risk</SelectItem>
+                    <SelectItem value="high">High Risk</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldGroup>
+              <FieldGroup label="Pregnancy Remarks" className="md:col-span-2 lg:col-span-3">
+                <Input
+                  placeholder="Notes on pregnancy status, referrals, or concerns"
+                  value={data.pregnancyRemarks}
+                  onChange={(e) => onChange("pregnancyRemarks", e.target.value)}
+                />
+              </FieldGroup>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-blue-700 dark:text-blue-400">
+            I. Medical &amp; Surgical History
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-semibold mb-2">Past Medical History</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-800">
+              <div className="grid grid-cols-1 md:grid-cols-4">
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-2">
+                  {HISTORY_OPTIONS.slice(0, 10).map((key) => (
+                    <label key={key} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={selectedPastMedical.has(key)}
+                        onCheckedChange={(checked) =>
+                          togglePastMedical(key, checked === true)
+                        }
+                      />
+                      <span>{HISTORY_OPTION_LABELS[key]}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-2">
+                  {HISTORY_OPTIONS.slice(10).map((key) => (
+                    <label key={key} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={selectedPastMedical.has(key)}
+                        onCheckedChange={(checked) =>
+                          togglePastMedical(key, checked === true)
+                        }
+                      />
+                      <span>{HISTORY_OPTION_LABELS[key]}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-3">
+                  <FieldGroup label="Specify allergy:">
+                    <Input
+                      value={data.pmhSpecifyAllergy}
+                      onChange={(e) => onChange("pmhSpecifyAllergy", e.target.value)}
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify hepatitis type:">
+                    <Input
+                      value={data.pmhSpecifyHepatitisType}
+                      onChange={(e) =>
+                        onChange("pmhSpecifyHepatitisType", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify pulmonary tuberculosis category:">
+                    <Input
+                      value={data.pmhSpecifyPulmonaryTbCategory}
+                      onChange={(e) =>
+                        onChange("pmhSpecifyPulmonaryTbCategory", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Others, please specify:">
+                    <Input
+                      value={data.pmhOthersSpecify}
+                      onChange={(e) => onChange("pmhOthersSpecify", e.target.value)}
+                    />
+                  </FieldGroup>
+                </div>
+                <div className="p-3 space-y-3">
+                  <FieldGroup label="Specify organ with cancer:">
+                    <Input
+                      value={data.pmhSpecifyOrganCancer}
+                      onChange={(e) =>
+                        onChange("pmhSpecifyOrganCancer", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Highest blood pressure (BP):">
+                    <Input
+                      value={data.pmhHighestBloodPressure}
+                      onChange={(e) =>
+                        onChange("pmhHighestBloodPressure", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify extrapulmonary tuberculosis category:">
+                    <Input
+                      value={data.pmhSpecifyExtrapulmonaryTbCategory}
+                      onChange={(e) =>
+                        onChange(
+                          "pmhSpecifyExtrapulmonaryTbCategory",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </FieldGroup>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <FieldGroup label="Past Surgical History (Date and operation done)">
+            <Textarea
+              rows={4}
+              value={data.pastSurgicalHistory}
+              onChange={(e) => onChange("pastSurgicalHistory", e.target.value)}
+            />
+          </FieldGroup>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Part 5 ─────────────────────────────────────────────────────────────────
+
+function Part5({
+  data,
+  onChange,
+}: {
+  data: BarangayProfileFormData;
+  onChange: (field: keyof BarangayProfileFormData, value: string) => void;
+}) {
+  const selectedFamilyHistory = parseHistorySelections(data.familyHistory);
+
+  const toggleFamilyHistory = (key: (typeof HISTORY_OPTIONS)[number], checked: boolean) => {
+    const next = new Set(selectedFamilyHistory);
+
+    if (checked) {
+      if (key === "none") {
+        next.clear();
+        next.add("none");
+      } else {
+        next.delete("none");
+        next.add(key);
+      }
+    } else {
+      next.delete(key);
+    }
+
+    onChange("familyHistory", stringifyHistorySelections(next));
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-blue-700 dark:text-blue-400">
+            II. Family &amp; Personal History
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-semibold mb-2">Family History</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-800">
+              <div className="grid grid-cols-1 md:grid-cols-4">
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-2">
+                  {HISTORY_OPTIONS.slice(0, 10).map((key) => (
+                    <label key={key} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={selectedFamilyHistory.has(key)}
+                        onCheckedChange={(checked) =>
+                          toggleFamilyHistory(key, checked === true)
+                        }
+                      />
+                      <span>{HISTORY_OPTION_LABELS[key]}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-2">
+                  {HISTORY_OPTIONS.slice(10).map((key) => (
+                    <label key={key} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={selectedFamilyHistory.has(key)}
+                        onCheckedChange={(checked) =>
+                          toggleFamilyHistory(key, checked === true)
+                        }
+                      />
+                      <span>{HISTORY_OPTION_LABELS[key]}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-3 space-y-3">
+                  <FieldGroup label="Specify allergy:">
+                    <Input
+                      value={data.fhSpecifyAllergy}
+                      onChange={(e) => onChange("fhSpecifyAllergy", e.target.value)}
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify hepatitis type:">
+                    <Input
+                      value={data.fhSpecifyHepatitisType}
+                      onChange={(e) =>
+                        onChange("fhSpecifyHepatitisType", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify pulmonary tuberculosis category:">
+                    <Input
+                      value={data.fhSpecifyPulmonaryTbCategory}
+                      onChange={(e) =>
+                        onChange("fhSpecifyPulmonaryTbCategory", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Others, please specify:">
+                    <Input
+                      value={data.fhOthersSpecify}
+                      onChange={(e) => onChange("fhOthersSpecify", e.target.value)}
+                    />
+                  </FieldGroup>
+                </div>
+                <div className="p-3 space-y-3">
+                  <FieldGroup label="Specify organ with cancer:">
+                    <Input
+                      value={data.fhSpecifyOrganCancer}
+                      onChange={(e) => onChange("fhSpecifyOrganCancer", e.target.value)}
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Highest blood pressure (BP):">
+                    <Input
+                      value={data.fhHighestBloodPressure}
+                      onChange={(e) => onChange("fhHighestBloodPressure", e.target.value)}
+                    />
+                  </FieldGroup>
+                  <FieldGroup label="Specify extrapulmonary tuberculosis category:">
+                    <Input
+                      value={data.fhSpecifyExtrapulmonaryTbCategory}
+                      onChange={(e) =>
+                        onChange("fhSpecifyExtrapulmonaryTbCategory", e.target.value)
+                      }
+                    />
+                  </FieldGroup>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold mb-2">Personal Social History</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-800 p-3 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Smoking</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.smokingStatus === "yes"}
+                      onCheckedChange={(checked) =>
+                        onChange("smokingStatus", checked === true ? "yes" : "")
+                      }
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.smokingStatus === "no"}
+                      onCheckedChange={(checked) =>
+                        onChange("smokingStatus", checked === true ? "no" : "")
+                      }
+                    />
+                    No
+                  </label>
+                </div>
+                <FieldGroup label="Number of packs per year:">
+                  <Input
+                    value={data.smokingPacksPerYear}
+                    onChange={(e) => onChange("smokingPacksPerYear", e.target.value)}
+                  />
+                </FieldGroup>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Alcohol</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.alcoholIntake === "yes"}
+                      onCheckedChange={(checked) =>
+                        onChange("alcoholIntake", checked === true ? "yes" : "")
+                      }
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.alcoholIntake === "no"}
+                      onCheckedChange={(checked) =>
+                        onChange("alcoholIntake", checked === true ? "no" : "")
+                      }
+                    />
+                    No
+                  </label>
+                </div>
+                <FieldGroup label="Number of bottles per day:">
+                  <Input
+                    value={data.alcoholBottlesPerDay}
+                    onChange={(e) => onChange("alcoholBottlesPerDay", e.target.value)}
+                  />
+                </FieldGroup>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Illicit Drugs</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.illicitDrugs === "yes"}
+                      onCheckedChange={(checked) =>
+                        onChange("illicitDrugs", checked === true ? "yes" : "")
+                      }
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.illicitDrugs === "no"}
+                      onCheckedChange={(checked) =>
+                        onChange("illicitDrugs", checked === true ? "no" : "")
+                      }
+                    />
+                    No
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Sexually Active?</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.sexuallyActive === "yes"}
+                      onCheckedChange={(checked) =>
+                        onChange("sexuallyActive", checked === true ? "yes" : "")
+                      }
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={data.sexuallyActive === "no"}
+                      onCheckedChange={(checked) =>
+                        onChange("sexuallyActive", checked === true ? "no" : "")
+                      }
+                    />
+                    No
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // ─── Main Form Component ─────────────────────────────────────────────────────
 
-const PARTS = ["part-1", "part-2", "part-3"] as const;
+const PARTS = ["part-1", "part-2", "part-3", "part-4", "part-5"] as const;
 type Part = (typeof PARTS)[number];
 
 const PART_LABELS: Record<Part, string> = {
   "part-1": "Personal Info",
   "part-2": "Family Background",
   "part-3": "Address & Contact",
+  "part-4": "Pregnancy & Medical",
+  "part-5": "Family & Personal History",
 };
 
 interface BarangayProfileFormProps {
@@ -761,6 +1403,12 @@ export function BarangayProfileForm({
       )}
       {activePart === "part-3" && (
         <Part3 data={data} onChange={handleChange} />
+      )}
+      {activePart === "part-4" && (
+        <Part4 data={data} onChange={handleChange} />
+      )}
+      {activePart === "part-5" && (
+        <Part5 data={data} onChange={handleChange} />
       )}
 
       {/* Navigation & Submit */}

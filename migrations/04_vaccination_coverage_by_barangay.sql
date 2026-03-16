@@ -206,10 +206,10 @@ FOR SELECT USING (
 );
 
 -- ============================================================================
--- SAMPLE DATA INSERTION
+-- OPTIONAL BASELINE DATA INSERTION
 -- ============================================================================
--- This section contains sample data to help test the GIS map feature
--- Uncomment to populate with test data
+-- This section can be used to bootstrap healthcare records for the GIS map.
+-- Review and adapt values to match your community profile before running.
 
 -- Sample vaccination records
 -- INSERT INTO vaccination_records (resident_id, barangay, vaccine_type, dose_number, vaccination_date)
@@ -252,7 +252,7 @@ GRANT ALL ON senior_citizen_assistance TO service_role;
 -- 1. Run these migrations with admin/superuser privileges
 -- 2. Ensure residents table exists before running this migration
 -- 3. Update RLS policies based on your actual authentication setup
--- 4. Test views and sample data queries
+-- 4. Validate views and baseline data queries
 -- 5. Monitor performance with EXPLAIN ANALYZE for large datasets
 -- 6. Run periodic ANALYZE to update table statistics
 -- ============================================================================

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -84,12 +84,6 @@ export function WorkerDashboardLayout({
 }: WorkerDashboardLayoutProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Prevent hydration mismatch with Radix UI components
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleLogout = async () => {
     await workerLogoutAction();
@@ -182,63 +176,51 @@ export function WorkerDashboardLayout({
           </div>
 
           {/* QR Scanner quick-access button */}
-          <Link href="/dashboard-workers/scanner">
-            <Button
-              size="sm"
-              className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
-            >
+          <Button
+            asChild
+            size="sm"
+            className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            <Link href="/dashboard-workers/scanner">
               <QrCode className="h-4 w-4" />
               <span className="hidden sm:inline">Scan QR</span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
 
           {/* User Menu */}
-          {mounted ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8 border-2 border-emerald-300">
-                    <AvatarFallback className="bg-emerald-100 text-emerald-700">
-                      {getUserInitials(user.username)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden text-sm font-medium md:inline-block">
-                    {user.username}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user.username}</p>
-                    <p className="text-xs text-slate-500">
-                      Role:{" "}
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button variant="ghost" className="flex items-center gap-2">
-              <Avatar className="h-8 w-8 border-2 border-emerald-300">
-                <AvatarFallback className="bg-emerald-100 text-emerald-700">
-                  {getUserInitials(user.username)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden text-sm font-medium md:inline-block">
-                {user.username}
-              </span>
-            </Button>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2">
+                <Avatar className="h-8 w-8 border-2 border-emerald-300">
+                  <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                    {getUserInitials(user.username)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden text-sm font-medium md:inline-block">
+                  {user.username}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">{user.username}</p>
+                  <p className="text-xs text-slate-500">
+                    Role:{" "}
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {/* Page Content */}

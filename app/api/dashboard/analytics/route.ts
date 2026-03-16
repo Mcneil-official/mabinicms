@@ -37,6 +37,16 @@ type AnalyticsPayload = {
   insights: Insight[];
 };
 
+type BarangayProfileAnalyticsRow = {
+  id: string;
+  is_pregnant: string | null;
+  pregnancy_risk_level: string | null;
+  prenatal_checkup_date: string | null;
+  updated_at: string | null;
+  past_medical_history: string | null;
+  family_history: string | null;
+};
+
 function canViewDashboardAnalytics(role: string) {
   return role === "admin" || role === "barangay_admin" || role === "staff";
 }
@@ -62,6 +72,14 @@ function normalizeLabel(value: string | null | undefined) {
     .trim()
     .replace(/\s+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function parseHistorySelections(value: string | null | undefined) {
+  if (!value) return [] as string[];
+  return value
+    .split("|")
+    .map((item) => item.trim())
+    .filter((item) => Boolean(item) && item !== "none");
 }
 
 function isMissingTableError(
@@ -127,7 +145,33 @@ export async function GET() {
       .map((resident) => resident.id)
       .filter((id): id is string => Boolean(id));
 
-    const totalResidents = residentIds.length;
+    const barangayProfilesQuery = scopedBarangay
+      ? db
+          .from("barangay_profiles")
+          .select(
+            "id, is_pregnant, pregnancy_risk_level, prenatal_checkup_date, updated_at",
+          )
+          .eq("current_barangay", scopedBarangay)
+      : db
+          .from("barangay_profiles")
+          .select(
+            "id, is_pregnant, pregnancy_risk_level, prenatal_checkup_date, updated_at",
+          );
+
+    const { data: barangayProfiles, error: barangayProfilesError } =
+      await barangayProfilesQuery;
+
+    if (barangayProfilesError && !isMissingTableError(barangayProfilesError)) {
+      throw barangayProfilesError;
+    }
+
+    const profileRows = (barangayProfiles || []) as BarangayProfileAnalyticsRow[];
+
+    const pregnancyProfiles = profileRows.filter(
+      (profile) => profile.is_pregnant === "yes",
+    );
+
+    const totalResidents = profileRows.length > 0 ? profileRows.length : residentIds.length;
     const barangayLabel = scopedBarangay || "All Barangays";
 
     const emptyPayload: AnalyticsPayload = {
@@ -159,77 +203,30 @@ export async function GET() {
       insights: [
         {
           title: "No records available",
-          description: "No resident-linked records found for this scope yet.",
+          description: "No barangay profiling records found for this scope yet.",
           severity: "warning",
         },
       ],
     };
 
-    if (residentIds.length === 0) {
+    if (profileRows.length === 0 && residentIds.length === 0) {
       return NextResponse.json(emptyPayload);
     }
 
-    const [
-      vaccinations,
-      maternal,
-      seniors,
-      indicators,
-      diseases,
-    ] = await Promise.all([
-      fetchFromFirstExistingTable<{
-        resident_id: string;
-        vaccine_name: string | null;
-        vaccine_date: string | null;
-        status: string | null;
-      }>(
-        supabase,
-        ["vaccination_records"],
-        "resident_id, vaccine_name, vaccine_date, status",
-        residentIds,
-      ),
-      fetchFromFirstExistingTable<{
-        resident_id: string;
-        visit_date: string | null;
-        record_type: string | null;
-        trimester: string | null;
-      }>(
-        supabase,
-        ["maternal_health_records", "maternal_records", "maternal_health"],
-        "resident_id, visit_date, record_type, trimester",
-        residentIds,
-      ),
-      fetchFromFirstExistingTable<{
-        resident_id: string;
-        visit_date: string | null;
-        assistance_type: string | null;
-      }>(
-        supabase,
-        ["senior_assistance_records", "seniors_assistance"],
-        "resident_id, visit_date, assistance_type",
-        residentIds,
-      ),
-      fetchFromFirstExistingTable<{
-        resident_id: string;
-        indicator_type: string | null;
-        status: string | null;
-        recorded_at: string | null;
-      }>(
-        supabase,
-        ["health_indicators"],
-        "resident_id, indicator_type, status, recorded_at",
-        residentIds,
-      ),
-      fetchFromFirstExistingTable<{
-        resident_id: string;
-        disease_name: string | null;
-        date_reported: string | null;
-      }>(
-        supabase,
-        ["disease_cases"],
-        "resident_id, disease_name, date_reported",
-        residentIds,
-      ),
-    ]);
+    const vaccinations =
+      residentIds.length > 0
+        ? await fetchFromFirstExistingTable<{
+            resident_id: string;
+            vaccine_name: string | null;
+            vaccine_date: string | null;
+            status: string | null;
+          }>(
+            supabase,
+            ["vaccination_records"],
+            "resident_id, vaccine_name, vaccine_date, status",
+            residentIds,
+          )
+        : [];
 
     const completedVaccinations = vaccinations.filter(
       (item) => item.status === "completed",
@@ -246,35 +243,27 @@ export async function GET() {
         ? Math.round((completedVaccinations / vaccinations.length) * 100)
         : 0;
 
-    const pregnancyResidentIds = new Set(
-      maternal
-        .filter((record) => {
-          const recordType = (record.record_type || "").toLowerCase();
-          return (
-            Boolean(record.trimester) ||
-            recordType.includes("preg") ||
-            recordType.includes("prenatal") ||
-            recordType.includes("postpartum")
-          );
-        })
-        .map((record) => record.resident_id),
-    );
+    const pregnancyCases = pregnancyProfiles.length;
 
-    const pregnancyCases = pregnancyResidentIds.size;
+    const highRiskPregnancyProfiles = pregnancyProfiles.filter(
+      (profile) => profile.pregnancy_risk_level === "high",
+    ).length;
 
-    const criticalAlerts =
-      indicators.filter((item) => item.status === "critical").length +
-      overdueVaccinations;
+    const medicalHistoryProfiles = profileRows.filter(
+      (profile) => parseHistorySelections(profile.past_medical_history).length > 0,
+    ).length;
+
+    const familyHistoryProfiles = profileRows.filter(
+      (profile) => parseHistorySelections(profile.family_history).length > 0,
+    ).length;
+
+    const criticalAlerts = overdueVaccinations + highRiskPregnancyProfiles;
 
     const serviceCounter: Record<string, number> = {};
-    maternal.forEach((item) => {
-      const key = normalizeLabel(item.record_type || "Maternal Visit");
-      serviceCounter[key] = (serviceCounter[key] || 0) + 1;
-    });
-    seniors.forEach((item) => {
-      const key = normalizeLabel(item.assistance_type || "Senior Assistance");
-      serviceCounter[key] = (serviceCounter[key] || 0) + 1;
-    });
+    serviceCounter["Prenatal Monitoring"] = pregnancyCases;
+    serviceCounter["High-Risk Pregnancy Follow-up"] = highRiskPregnancyProfiles;
+    serviceCounter["Medical History Review"] = medicalHistoryProfiles;
+    serviceCounter["Family History Monitoring"] = familyHistoryProfiles;
     vaccinations.forEach((item) => {
       const key = normalizeLabel(item.vaccine_name || "Vaccination");
       serviceCounter[key] = (serviceCounter[key] || 0) + 1;
@@ -283,19 +272,17 @@ export async function GET() {
     const priorityServices = toTopItems(serviceCounter, 6);
 
     const conditionCounter: Record<string, number> = {};
-    if (diseases.length > 0) {
-      diseases.forEach((item) => {
-        const key = normalizeLabel(item.disease_name);
+    profileRows.forEach((profile) => {
+      const conditions = [
+        ...parseHistorySelections(profile.past_medical_history),
+        ...parseHistorySelections(profile.family_history),
+      ];
+
+      conditions.forEach((condition) => {
+        const key = normalizeLabel(condition);
         conditionCounter[key] = (conditionCounter[key] || 0) + 1;
       });
-    } else {
-      indicators
-        .filter((item) => item.status === "warning" || item.status === "critical")
-        .forEach((item) => {
-          const key = normalizeLabel(item.indicator_type);
-          conditionCounter[key] = (conditionCounter[key] || 0) + 1;
-        });
-    }
+    });
 
     const commonConditions = toTopItems(conditionCounter, 6);
 
@@ -320,13 +307,13 @@ export async function GET() {
       if (trendMap[key]) trendMap[key].vaccinations += 1;
     });
 
-    maternal.forEach((item) => {
-      const key = bucketMonth(item.visit_date);
+    pregnancyProfiles.forEach((profile) => {
+      const key = bucketMonth(profile.prenatal_checkup_date || profile.updated_at);
       if (trendMap[key]) trendMap[key].pregnancyVisits += 1;
     });
 
-    seniors.forEach((item) => {
-      const key = bucketMonth(item.visit_date);
+    profileRows.forEach((profile) => {
+      const key = bucketMonth(profile.updated_at);
       if (trendMap[key]) trendMap[key].priorityServices += 1;
     });
 

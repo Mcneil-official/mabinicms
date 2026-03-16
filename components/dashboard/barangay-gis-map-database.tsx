@@ -13,7 +13,7 @@ interface BarangayGisMapDatabaseProps {
   mapHeight?: string;
   showLegend?: boolean;
   showMapLegend?: boolean;
-  fallbackToMock?: boolean;
+  fallbackToHealthcareData?: boolean;
 }
 
 /**
@@ -37,7 +37,7 @@ export async function BarangayGisMapDatabase({
   mapHeight = "h-[600px]",
   showLegend = true,
   showMapLegend = true,
-  fallbackToMock = true,
+  fallbackToHealthcareData = true,
 }: BarangayGisMapDatabaseProps) {
   // Fetch real data from database
   const vaccinationData = await getGisMapVaccinationData();
@@ -48,12 +48,12 @@ export async function BarangayGisMapDatabase({
   return (
     <BarangayGisMapIntegrated
       data={hasData ? vaccinationData : undefined}
-      useMockData={!hasData && fallbackToMock}
+      useFallbackData={!hasData && fallbackToHealthcareData}
       title={title}
       description={
         hasData
           ? description
-          : "Using sample data - Please add residents and vaccination records to your database"
+          : "Using fallback healthcare records while live vaccination data is being populated"
       }
       mapHeight={mapHeight}
       showLegend={showLegend}

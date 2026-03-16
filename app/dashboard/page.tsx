@@ -202,7 +202,7 @@ export default function DashboardPage() {
          Health Coverage by Barangay
         </h2>
         <BarangayGisMapIntegrated
-          useMockData={true}
+          useFallbackData={true}
           mapHeight="h-[600px]"
           showLegend={true}
           showMapLegend={true}

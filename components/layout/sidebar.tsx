@@ -14,7 +14,6 @@ import {
   X,
   Calendar,
   Megaphone,
-  Baby,
   Pill,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -52,11 +51,6 @@ const menuItems = [
     href: "/dashboard/medications",
     icon: Pill,
     label: "Medications",
-  },
-  {
-    href: "/dashboard/pregnancy",
-    icon: Baby,
-    label: "Pregnancy Profiling",
   },
   { href: "/dashboard/staff", icon: Users, label: "Staff Management" },
   {

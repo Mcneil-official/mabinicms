@@ -1,0 +1,30 @@
+-- Merge pregnancy profiling fields into barangay_profiles
+-- Adds Medical & Surgical History and Family & Personal History columns
+
+ALTER TABLE public.barangay_profiles
+  ADD COLUMN IF NOT EXISTS is_pregnant text CHECK (is_pregnant IN ('yes', 'no')),
+  ADD COLUMN IF NOT EXISTS pregnancy_months integer CHECK (pregnancy_months >= 0 AND pregnancy_months <= 10),
+  ADD COLUMN IF NOT EXISTS gravida integer CHECK (gravida >= 0),
+  ADD COLUMN IF NOT EXISTS para integer CHECK (para >= 0),
+  ADD COLUMN IF NOT EXISTS lmp date,
+  ADD COLUMN IF NOT EXISTS edd date,
+  ADD COLUMN IF NOT EXISTS prenatal_checkup_date date,
+  ADD COLUMN IF NOT EXISTS pregnancy_risk_level text CHECK (pregnancy_risk_level IN ('low', 'moderate', 'high')),
+  ADD COLUMN IF NOT EXISTS pregnancy_remarks text,
+  ADD COLUMN IF NOT EXISTS has_hypertension text,
+  ADD COLUMN IF NOT EXISTS has_diabetes text,
+  ADD COLUMN IF NOT EXISTS has_asthma text,
+  ADD COLUMN IF NOT EXISTS has_heart_disease text,
+  ADD COLUMN IF NOT EXISTS past_surgeries text,
+  ADD COLUMN IF NOT EXISTS current_medications text,
+  ADD COLUMN IF NOT EXISTS allergies text,
+  ADD COLUMN IF NOT EXISTS hospitalization_history text,
+  ADD COLUMN IF NOT EXISTS family_hypertension text,
+  ADD COLUMN IF NOT EXISTS family_diabetes text,
+  ADD COLUMN IF NOT EXISTS family_asthma text,
+  ADD COLUMN IF NOT EXISTS family_cancer text,
+  ADD COLUMN IF NOT EXISTS smoking_status text,
+  ADD COLUMN IF NOT EXISTS alcohol_intake text,
+  ADD COLUMN IF NOT EXISTS exercise_frequency text,
+  ADD COLUMN IF NOT EXISTS dietary_pattern text,
+  ADD COLUMN IF NOT EXISTS personal_history_notes text;

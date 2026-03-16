@@ -55,6 +55,39 @@ const EMP_LABELS: Record<string, string> = {
   retired: "Retired",
 };
 
+const HISTORY_OPTION_LABELS: Record<string, string> = {
+  allergy: "Allergy",
+  asthma: "Asthma",
+  cancer: "Cancer",
+  cerebrovascular_disease: "Cerebrovascular disease",
+  coronary_artery_disease: "Coronary artery disease",
+  diabetes_mellitus: "Diabetes Mellitus",
+  emphysema: "Emphysema",
+  epilepsy_seizure_disorder: "Epilepsy/Seizure Disorder",
+  hepatitis: "Hepatitis",
+  hyperlipidemia: "Hyperlipidemia",
+  hypertension: "Hypertension",
+  peptic_ulcer: "Peptic ulcer",
+  pneumonia: "Pneumonia",
+  thyroid_disease: "Thyroid disease",
+  pulmonary_tuberculosis: "Pulmonary tuberculosis",
+  extrapulmonary_tuberculosis: "Extrapulmonary tuberculosis",
+  urinary_tract_infection: "Urinary tract infection",
+  mental_illness: "Mental illness",
+  others: "Others",
+  none: "None",
+};
+
+function formatHistorySelections(value?: string) {
+  if (!value) return "";
+  return value
+    .split("|")
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .map((v) => HISTORY_OPTION_LABELS[v] ?? v)
+    .join(", ");
+}
+
 export function ViewProfileDialog({
   profile,
   open,
@@ -86,10 +119,12 @@ export function ViewProfileDialog({
         </DialogHeader>
 
         <Tabs defaultValue="personal">
-          <TabsList className="grid grid-cols-3 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="family">Family</TabsTrigger>
             <TabsTrigger value="address">Address</TabsTrigger>
+            <TabsTrigger value="pregnancy">Pregnancy</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
           {/* Personal */}
@@ -189,6 +224,128 @@ export function ViewProfileDialog({
             </p>
             <DetailRow label="Email" value={profile.email} />
             <DetailRow label="Mobile" value={profile.mobile} />
+          </TabsContent>
+
+          {/* Pregnancy */}
+          <TabsContent value="pregnancy" className="mt-4 space-y-1">
+            <DetailRow
+              label="Currently Pregnant"
+              value={
+                profile.isPregnant
+                  ? profile.isPregnant === "yes"
+                    ? "Yes"
+                    : "No"
+                  : undefined
+              }
+            />
+            <DetailRow label="AOG (Months)" value={profile.pregnancyMonths} />
+            <DetailRow label="Gravida" value={profile.gravida} />
+            <DetailRow label="Para" value={profile.para} />
+            <DetailRow label="LMP" value={profile.lmp} />
+            <DetailRow label="EDD" value={profile.edd} />
+            <DetailRow
+              label="Last Prenatal Check-up"
+              value={profile.prenatalCheckupDate}
+            />
+            <DetailRow label="Risk Level" value={profile.pregnancyRiskLevel} />
+            <DetailRow label="Pregnancy Remarks" value={profile.pregnancyRemarks} />
+          </TabsContent>
+
+          {/* History */}
+          <TabsContent value="history" className="mt-4 space-y-1">
+            <p className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-2">
+              Medical &amp; Surgical History
+            </p>
+            <DetailRow
+              label="Past Medical History"
+              value={formatHistorySelections(profile.pastMedicalHistory)}
+            />
+            <DetailRow label="Specify Allergy" value={profile.pmhSpecifyAllergy} />
+            <DetailRow
+              label="Specify Organ with Cancer"
+              value={profile.pmhSpecifyOrganCancer}
+            />
+            <DetailRow
+              label="Specify Hepatitis Type"
+              value={profile.pmhSpecifyHepatitisType}
+            />
+            <DetailRow
+              label="Highest Blood Pressure (BP)"
+              value={profile.pmhHighestBloodPressure}
+            />
+            <DetailRow
+              label="Pulmonary TB Category"
+              value={profile.pmhSpecifyPulmonaryTbCategory}
+            />
+            <DetailRow
+              label="Extrapulmonary TB Category"
+              value={profile.pmhSpecifyExtrapulmonaryTbCategory}
+            />
+            <DetailRow label="Others Specify" value={profile.pmhOthersSpecify} />
+            <DetailRow
+              label="Past Surgical History"
+              value={profile.pastSurgicalHistory}
+            />
+
+            <p className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mt-4 mb-2">
+              Family &amp; Personal History
+            </p>
+            <DetailRow
+              label="Family History"
+              value={formatHistorySelections(profile.familyHistory)}
+            />
+            <DetailRow label="Specify Allergy" value={profile.fhSpecifyAllergy} />
+            <DetailRow
+              label="Specify Organ with Cancer"
+              value={profile.fhSpecifyOrganCancer}
+            />
+            <DetailRow
+              label="Specify Hepatitis Type"
+              value={profile.fhSpecifyHepatitisType}
+            />
+            <DetailRow
+              label="Highest Blood Pressure (BP)"
+              value={profile.fhHighestBloodPressure}
+            />
+            <DetailRow
+              label="Pulmonary TB Category"
+              value={profile.fhSpecifyPulmonaryTbCategory}
+            />
+            <DetailRow
+              label="Extrapulmonary TB Category"
+              value={profile.fhSpecifyExtrapulmonaryTbCategory}
+            />
+            <DetailRow label="Others Specify" value={profile.fhOthersSpecify} />
+            <DetailRow label="Smoking" value={profile.smokingStatus} />
+            <DetailRow
+              label="Number of Packs per Year"
+              value={profile.smokingPacksPerYear}
+            />
+            <DetailRow label="Alcohol" value={profile.alcoholIntake} />
+            <DetailRow
+              label="Number of Bottles per Day"
+              value={profile.alcoholBottlesPerDay}
+            />
+            <DetailRow label="Illicit Drugs" value={profile.illicitDrugs} />
+            <DetailRow label="Sexually Active" value={profile.sexuallyActive} />
+            <DetailRow
+              label="Family Hypertension"
+              value={profile.familyHypertension}
+            />
+            <DetailRow label="Family Diabetes" value={profile.familyDiabetes} />
+            <DetailRow label="Family Asthma" value={profile.familyAsthma} />
+            <DetailRow label="Family Cancer" value={profile.familyCancer} />
+            <DetailRow label="Smoking Status" value={profile.smokingStatus} />
+            <DetailRow label="Alcohol Intake" value={profile.alcoholIntake} />
+            <DetailRow
+              label="Exercise Frequency"
+              value={profile.exerciseFrequency}
+            />
+            <DetailRow label="Dietary Pattern" value={profile.dietaryPattern} />
+            <DetailRow
+              label="Personal History Notes"
+              value={profile.personalHistoryNotes}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>

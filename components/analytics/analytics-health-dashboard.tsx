@@ -328,15 +328,15 @@ export function AnalyticsHealthDashboard({
                   innerRadius={70}
                   outerRadius={110}
                   paddingAngle={2}
-                  label={({ name, percent }) =>
-                    `${name} ${((percent || 0) * 100).toFixed(0)}%`
-                  }
+                  label={false}
+                  labelLine={false}
                 >
                   {(data?.vaccinationStatus || []).map((_, index) => (
                     <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
+                <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>

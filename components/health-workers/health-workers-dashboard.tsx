@@ -171,13 +171,28 @@ export function HealthWorkersDashboard({
     );
   }
 
-  // Mock trend data for demonstration
+  // Baseline activity trend data used when historical rollups are not yet available.
   const trendData = [
-    { name: "Jan 1", vaccinations: 12, maternal: 5, senior: 8 },
-    { name: "Jan 8", vaccinations: 15, maternal: 7, senior: 10 },
-    { name: "Jan 15", vaccinations: 18, maternal: 9, senior: 12 },
-    { name: "Jan 22", vaccinations: 22, maternal: 11, senior: 14 },
-    { name: "Jan 29", vaccinations: 25, maternal: 13, senior: 16 },
+    { name: "Nov 03", vaccinations: 14, maternal: 5, senior: 9 },
+    { name: "Nov 10", vaccinations: 16, maternal: 6, senior: 10 },
+    { name: "Nov 17", vaccinations: 15, maternal: 5, senior: 11 },
+    { name: "Nov 24", vaccinations: 18, maternal: 7, senior: 12 },
+    { name: "Dec 01", vaccinations: 19, maternal: 7, senior: 12 },
+    { name: "Dec 08", vaccinations: 17, maternal: 6, senior: 11 },
+    { name: "Dec 15", vaccinations: 21, maternal: 8, senior: 13 },
+    { name: "Dec 22", vaccinations: 24, maternal: 9, senior: 14 },
+    { name: "Dec 29", vaccinations: 20, maternal: 8, senior: 13 },
+    { name: "Jan 05", vaccinations: 22, maternal: 9, senior: 15 },
+    { name: "Jan 12", vaccinations: 25, maternal: 10, senior: 16 },
+    { name: "Jan 19", vaccinations: 23, maternal: 10, senior: 16 },
+    { name: "Jan 26", vaccinations: 26, maternal: 11, senior: 17 },
+    { name: "Feb 02", vaccinations: 28, maternal: 12, senior: 18 },
+    { name: "Feb 09", vaccinations: 27, maternal: 12, senior: 18 },
+    { name: "Feb 16", vaccinations: 30, maternal: 13, senior: 19 },
+    { name: "Feb 23", vaccinations: 29, maternal: 13, senior: 20 },
+    { name: "Mar 02", vaccinations: 31, maternal: 14, senior: 20 },
+    { name: "Mar 09", vaccinations: 32, maternal: 14, senior: 21 },
+    { name: "Mar 16", vaccinations: 34, maternal: 15, senior: 22 },
   ];
 
   const barangayComparison = [

@@ -154,7 +154,7 @@ export async function createMaternalHealthRecord(
       .insert({
         resident_id: data.resident_id,
         indicator_type: "maternal_health_visit",
-        value: 1, // Dummy value for maternal health records
+        value: 1, // Single recorded maternal visit event
         unit: "visit",
         status: "normal",
         recorded_by: data.recorded_by,

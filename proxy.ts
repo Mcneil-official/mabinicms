@@ -2,12 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 
 /**
- * Middleware to protect dashboard routes and enforce role-based access
+ * Proxy to protect dashboard routes and enforce role-based access
  * - Redirects unauthenticated users to /auth/login
  * - Routes users to appropriate dashboard based on role
  * - Enforces health worker access control
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Protected routes
@@ -52,7 +52,6 @@ export async function middleware(request: NextRequest) {
     // Sub-route protection
     const healthWorkerRoute = pathname.startsWith("/dashboard/health-workers");
     const staffRoute = pathname.startsWith("/dashboard/staff");
-    const pregnancyRoute = pathname.startsWith("/dashboard/pregnancy");
 
     if (healthWorkerRoute && session.user.role !== "workers") {
       // Non-health workers trying to access health worker routes
@@ -63,18 +62,6 @@ export async function middleware(request: NextRequest) {
 
     if (staffRoute && session.user.role !== "staff") {
       // Non-staff trying to access staff routes
-      const appropriateRoute =
-        session.user.role === "workers"
-          ? "/dashboard/health-workers"
-          : "/dashboard";
-      return NextResponse.redirect(new URL(appropriateRoute, request.url));
-    }
-
-    // Pregnancy profiling is restricted to LGU staff, admins, and barangay admins
-    if (
-      pregnancyRoute &&
-      !["staff", "admin", "barangay_admin"].includes(session.user.role)
-    ) {
       const appropriateRoute =
         session.user.role === "workers"
           ? "/dashboard/health-workers"

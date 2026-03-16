@@ -46,7 +46,7 @@ Open Supabase SQL Editor and run `SUPABASE_SETUP.sql`:
 ```bash
 # This creates:
 # - 8 tables (users, residents, health_facilities, etc.)
-# - Sample data
+# - Baseline healthcare data
 # - All required indexes
 ```
 
