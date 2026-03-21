@@ -46,6 +46,16 @@ export async function loginAction(formData: {
       return { success: false, error: "Invalid username or password" };
     }
 
+    const role = (user.user_role || "").trim().toLowerCase();
+
+    // Workers are not allowed to log in from the Barangay Health staff portal.
+    if (role === "workers") {
+      return {
+        success: false,
+        error: "Invalid worker credentials",
+      };
+    }
+
     // Create session with 7-day expiry
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
@@ -64,7 +74,16 @@ export async function loginAction(formData: {
     // Set session in httpOnly cookie
     await setSession(session);
 
-    // Redirect to dashboard
+    // Redirect to role-specific dashboards
+    if (role === "workers") {
+      redirect("/dashboard-workers");
+    }
+
+    if (role === "barangay_admin") {
+      redirect("/dashboard-barangay");
+    }
+
+    // admin + staff default
     redirect("/dashboard");
   } catch (error) {
     console.error("[loginAction]", error);

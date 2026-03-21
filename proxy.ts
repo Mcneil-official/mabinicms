@@ -10,6 +10,8 @@ import { getSession } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  const role = (value?: string) => (value || "").trim().toLowerCase();
+
   // Protected routes
   const isProtectedRoute =
     pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard");
@@ -35,35 +37,49 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
+    const userRole = role(session.user.role);
+
     // Role-based route protection: workers vs LGU dashboard separation
     const isWorkerDashboard = pathname.startsWith("/dashboard-workers");
     const isLguDashboard = pathname.startsWith("/dashboard") && !isWorkerDashboard;
 
     // Workers must use /dashboard-workers, not /dashboard
-    if (isLguDashboard && session.user.role === "workers") {
+    if (isLguDashboard && userRole === "workers") {
       return NextResponse.redirect(new URL("/dashboard-workers", request.url));
     }
 
     // LGU users (non-workers) must use /dashboard, not /dashboard-workers
-    if (isWorkerDashboard && session.user.role !== "workers") {
+    if (isWorkerDashboard && userRole !== "workers") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // Route workers away from staff/CHO dashboards
+    if (pathname.startsWith("/dashboard-barangay") && userRole !== "barangay_admin" && userRole !== "staff") {
+      const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+
+    if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+      if (userRole === "workers") {
+        return NextResponse.redirect(new URL("/dashboard-workers", request.url));
+      }
     }
 
     // Sub-route protection
     const healthWorkerRoute = pathname.startsWith("/dashboard/health-workers");
     const staffRoute = pathname.startsWith("/dashboard/staff");
 
-    if (healthWorkerRoute && session.user.role !== "workers") {
+    if (healthWorkerRoute && userRole !== "workers") {
       // Non-health workers trying to access health worker routes
       const approporiateRoute =
-        session.user.role === "staff" ? "/dashboard/staff" : "/dashboard";
+        userRole === "staff" || userRole === "barangay_admin" ? "/dashboard" : "/dashboard";
       return NextResponse.redirect(new URL(approporiateRoute, request.url));
     }
 
-    if (staffRoute && session.user.role !== "staff") {
+    if (staffRoute && userRole !== "staff" && userRole !== "admin" && userRole !== "barangay_admin") {
       // Non-staff trying to access staff routes
       const appropriateRoute =
-        session.user.role === "workers"
+        userRole === "workers"
           ? "/dashboard/health-workers"
           : "/dashboard";
       return NextResponse.redirect(new URL(appropriateRoute, request.url));
