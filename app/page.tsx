@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   Activity,
-  ArrowRight,
   Building2,
   ClipboardList,
   Database,
@@ -13,33 +12,33 @@ const highlights = [
   {
     title: "Barangay Profiling",
     description:
-      "Maintain complete resident and family profiling records in one structured system.",
+      "Manage resident and family profiles in one structured system.",
     icon: Users,
   },
   {
     title: "Health Program Tracking",
     description:
-      "Monitor consultations, medications, announcements, and outcomes through a unified dashboard.",
+      "Track consultations, medications, announcements, and outcomes in one dashboard.",
     icon: Activity,
   },
   {
     title: "YAKAP Services",
     description:
-      "Support pregnancy and community care programs with organized data and workflow tools.",
+      "Support pregnancy and community care programs with structured data workflows.",
     icon: ClipboardList,
   },
   {
     title: "Secure Data Operations",
     description:
-      "Protect local government records with role-based access and accountable submissions.",
+      "Protect records through role-based access and accountable submissions.",
     icon: ShieldCheck,
   },
 ];
 
 const quickStats = [
-  { label: "Core Modules", value: "10+" },
-  { label: "Data Workflows", value: "Centralized" },
-  { label: "System Availability", value: "24/7" },
+  { label: "Active Modules", value: "10+" },
+  { label: "Workflow Model", value: "Centralized" },
+  { label: "Availability", value: "24/7" },
 ];
 
 export default function Page() {
@@ -83,33 +82,16 @@ export default function Page() {
         <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="mb-4 inline-flex items-center rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-secondary-foreground">
-              Official Entry Page
+              Official Access Page
             </p>
             <h2 className="max-w-2xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Community Health Data, Unified for Every Barangay.
+              One Health Data System for Every Barangay.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              NAGA CMS is the centralized system for profiling, monitoring, and
-              reporting barangay health services. Designed for administrators
-              and field workers, it keeps health records organized, accessible,
-              and ready for action.
+              NAGA CMS centralizes profiling, monitoring, and reporting for
+              barangay health services. Built for administrators and field
+              workers, it keeps records organized and ready for action.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-              >
-                Open Admin Portal
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/auth/workers"
-                className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-6 py-3 text-sm font-semibold transition hover:bg-muted"
-              >
-                Open Worker Portal
-              </Link>
-            </div>
 
             <div className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
               {quickStats.map((stat) => (
@@ -163,7 +145,6 @@ export default function Page() {
         <div className="mt-12 flex flex-col items-start justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p>
             Naga City Community Management System • Barangay Health Operations
-            Center
           </p>
           <p className="font-medium text-foreground">Version 1.0</p>
         </div>
