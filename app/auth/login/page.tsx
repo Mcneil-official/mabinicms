@@ -11,6 +11,16 @@ export default async function LoginPage() {
   // If already logged in, redirect to dashboard
   const session = await getSession();
   if (session) {
+    const role = (session.user.role || "").trim().toLowerCase();
+
+    if (role === "workers") {
+      redirect("/dashboard-workers");
+    }
+
+    if (role === "barangay_admin") {
+      redirect("/dashboard-barangay");
+    }
+
     redirect("/dashboard");
   }
 
