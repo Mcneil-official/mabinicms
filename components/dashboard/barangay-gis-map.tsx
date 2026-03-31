@@ -272,7 +272,7 @@ export function BarangayGisMap({
   data,
   onBarangaySelect,
   title = "Barangay Vaccination Coverage Map",
-  description = "Interactive map showing Naga City barangays with color-coded vaccination coverage markers",
+  description = "Interactive map showing Mabini barangays with color-coded vaccination coverage markers",
   height = "h-[600px]",
   showLegend = true,
 }: BarangayGisMapProps) {
@@ -317,7 +317,7 @@ export function BarangayGisMap({
       </CardHeader>
       <CardContent className="p-0" suppressHydrationWarning>
         <MapContainer
-          center={[13.6219, 123.1948]}
+          center={[13.72, 120.9]}
           zoom={13}
           className={`${height} w-full rounded-lg`}
           style={{ zIndex: 0 }}

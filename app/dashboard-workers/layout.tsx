@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { WorkerDashboardLayout } from "@/components/layout/worker-dashboard-layout";
 
 export const metadata = {
-  title: "Worker Dashboard - Barangay Health System",
+  title: "Worker Dashboard - MabiniCare",
 };
 
 export default async function WorkerDashboardRootLayout({

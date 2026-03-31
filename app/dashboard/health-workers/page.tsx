@@ -162,7 +162,7 @@ export default function HealthWorkersDashboard() {
             <div>
               <h1 className="text-4xl font-bold">Health Workers Dashboard</h1>
               <p className="text-gray-600 mt-2">
-                NagaCare Community Health System
+                MabiniCare Community Health System
               </p>
             </div>
             <div className="flex gap-2">

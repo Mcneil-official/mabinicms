@@ -1,6 +1,6 @@
 /**
  * RBAC Roles Definition
- * Centralized role configuration for NagaCMS
+ * Centralized role configuration for MabiniCare
  */
 
 export enum RoleType {

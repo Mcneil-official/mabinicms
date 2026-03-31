@@ -2,7 +2,7 @@
 
 ## Overview
 
-A comprehensive role-based access control (RBAC) system has been successfully designed and implemented for NagaCMS supporting three distinct user roles with dedicated dashboards, permissions matrices, and secure data isolation.
+A comprehensive role-based access control (RBAC) system has been successfully designed and implemented for MabiniCare supporting three distinct user roles with dedicated dashboards, permissions matrices, and secure data isolation.
 
 ---
 

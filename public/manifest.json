@@ -1,6 +1,6 @@
 {
-  "name": "Health Workers Dashboard",
-  "short_name": "Health Workers",
+  "name": "MabiniCare",
+  "short_name": "MabiniCare",
   "description": "Mobile-first health worker data entry and management system with offline capability",
   "start_url": "/",
   "scope": "/",

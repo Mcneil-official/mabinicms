@@ -318,9 +318,9 @@ export interface HealthWorker {
 // QR SCANNER TYPES
 // ============================================================================
 
-/** Payload embedded in the Aramon-generated QR code */
-export interface NagaCareQRPayload {
-  type: "nagacare_resident";
+/** Payload embedded in the MabiniCare-generated QR code */
+export interface MabiniCareQRPayload {
+  type: "mabinicare_resident";
   v: 1;
   id: string; // resident UUID
   name: string;

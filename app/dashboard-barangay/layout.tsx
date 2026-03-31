@@ -9,7 +9,7 @@ import { BarangayHealthDashboardLayout } from "@/components/layout/barangay-heal
 import { dbRoleToRoleType, RoleType } from "@/lib/rbac/roles";
 
 export const metadata = {
-  title: "Barangay Health Officer Dashboard - Barangay Health System",
+  title: "Barangay Health Officer Dashboard - MabiniCare",
 };
 
 export default async function BarangayHealthDashboardRootLayout({

@@ -8,8 +8,8 @@ import type { OfflineQueueItem } from "@/lib/types";
  * Syncs with Supabase when connection is restored
  */
 
-const QUEUE_KEY = "nagacare_offline_queue";
-const SYNC_STATUS_KEY = "nagacare_sync_status";
+const QUEUE_KEY = "mabinicare_offline_queue";
+const SYNC_STATUS_KEY = "mabinicare_sync_status";
 
 export interface SyncStatus {
   isSyncing: boolean;
@@ -310,7 +310,7 @@ export function downloadQueueBackup(): void {
   const csv = exportQueueAsCSV();
   const element = document.createElement("a");
   element.setAttribute("href", "data:text/csv;charset=utf-8," + encodeURI(csv));
-  element.setAttribute("download", `nagacare-queue-${Date.now()}.csv`);
+  element.setAttribute("download", `mabinicare-queue-${Date.now()}.csv`);
   element.style.display = "none";
   document.body.appendChild(element);
   element.click();

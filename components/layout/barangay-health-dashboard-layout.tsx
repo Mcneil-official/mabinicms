@@ -117,7 +117,7 @@ export function BarangayHealthDashboardLayout({
     name,
   }: {
     href: string;
-    icon: React.React.ComponentType<{ className?: string }>;
+    icon: React.ComponentType<{ className?: string }>;
     name: string;
   }) => (
     <Link

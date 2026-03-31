@@ -25,7 +25,7 @@ export interface AuditLog {
  */
 export async function auditLog(entry: AuditLog): Promise<void> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
 
     // Ensure audit_logs table exists
     await supabase.from("audit_logs").insert({
@@ -107,7 +107,7 @@ export async function auditAccessDenied(
  */
 export async function getUserAuditLogs(userId: string, limit: number = 100): Promise<AuditLog[]> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
 
     const { data, error } = await supabase
       .from("audit_logs")
@@ -133,7 +133,7 @@ export async function getUserAuditLogs(userId: string, limit: number = 100): Pro
  */
 export async function getResourceAuditLogs(resourceType: string, resourceId?: string): Promise<AuditLog[]> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
 
     let query = supabase
       .from("audit_logs")
@@ -163,7 +163,7 @@ export async function getResourceAuditLogs(resourceType: string, resourceId?: st
  */
 export async function getFailedAccessAttempts(sinceHours: number = 24): Promise<AuditLog[]> {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
 
     const since = new Date(Date.now() - sinceHours * 60 * 60 * 1000).toISOString();
 
@@ -191,7 +191,7 @@ export async function getFailedAccessAttempts(sinceHours: number = 24): Promise<
  */
 export async function getBarangayAuditSummary(barangay: string, days: number = 7) {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
 
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 

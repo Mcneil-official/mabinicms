@@ -1,4 +1,15 @@
 -- ============================================================================
+-- DATA SEED SCRIPT (INSERT / UPDATE / DELETE DATA OPERATIONS)
+-- Run this after schema setup.
+-- Generated: 2026-03-30
+-- ============================================================================
+
+
+-- ============================================================================
+-- BEGIN FILE: migrations/008_replace_placeholder_with_realistic_healthcare_data.sql
+-- ============================================================================
+
+-- ============================================================================
 -- REPLACE PLACEHOLDER/TEST DATA WITH REALISTIC HEALTHCARE RECORDS
 -- Run this in Supabase SQL Editor (or via migration runner with privileged role)
 -- ============================================================================
@@ -852,3 +863,7 @@ BEGIN
   RAISE NOTICE 'Placeholder cleanup + realistic healthcare seed completed successfully.';
 END
 $$;
+
+
+-- END FILE: migrations/008_replace_placeholder_with_realistic_healthcare_data.sql
+

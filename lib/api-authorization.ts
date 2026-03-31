@@ -25,7 +25,6 @@ export async function requireAuth(request: NextRequest) {
   return {
     isAuthenticated: true,
     session,
-    session: session,
   };
 }
 

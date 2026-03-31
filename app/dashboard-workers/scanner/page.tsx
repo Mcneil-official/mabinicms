@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { insertScanLog } from "@/lib/services/scanLogService";
-import type { NagaCareQRPayload } from "@/lib/types";
+import type { MabiniCareQRPayload } from "@/lib/types";
 
 // Dynamically import the scanner (camera access) to avoid SSR issues
 const QRScanner = dynamic(
@@ -35,7 +35,7 @@ export default function ScannerPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleScan = useCallback(
-    async (payload: NagaCareQRPayload) => {
+    async (payload: MabiniCareQRPayload) => {
       if (processing) return; // debounce duplicate decodes
       setProcessing(true);
       setError(null);
@@ -74,7 +74,7 @@ export default function ScannerPage() {
           QR Health ID Scanner
         </h1>
         <p className="text-sm text-slate-500">
-          Scan a resident&apos;s NagaCare QR code to view their full health
+          Scan a resident&apos;s MabiniCare QR code to view their full health
           profile.
         </p>
       </div>

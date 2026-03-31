@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { MABINI_BARANGAYS_UPPERCASE } from "@/lib/constants/barangays";
 
 type AnnouncementStatus = "draft" | "published";
 
@@ -31,35 +32,6 @@ interface AnnouncementItem {
 
 const ALL_BARANGAYS_OPTION = "__all_barangays__";
 
-const BARANGAYS = [
-  "ABELLA",
-  "DAYANGDANG",
-  "PEÑAFRANCIA",
-  "BAGUMBAYAN NORTE",
-  "DEL ROSARIO",
-  "SABANG",
-  "BAGUMBAYAN SUR",
-  "DINAGA",
-  "SAN FELIPE",
-  "BALATAS",
-  "IGUALDAD INTERIOR",
-  "SAN FRANCISCO (POB.)",
-  "CALAUAG",
-  "LERMA",
-  "SAN ISIDRO",
-  "CARARAYAN",
-  "LIBOTON",
-  "SANTA CRUZ",
-  "CAROLINA",
-  "MABOLO",
-  "TABUCO",
-  "CONCEPCION GRANDE",
-  "PACOL",
-  "TINAGO",
-  "CONCEPCION PEQUEÑO",
-  "PANICUASON",
-  "TRIANGULO",
-];
 
 const initialForm = {
   title: "",
@@ -138,13 +110,13 @@ export function AnnouncementManagement() {
 
       const mergedBarangays = normalizeBarangayList([
         ...(barangayData.data || []),
-        ...BARANGAYS,
+        ...MABINI_BARANGAYS_UPPERCASE,
       ]).sort((a, b) => a.localeCompare(b));
 
       setAnnouncements(announcementData.data || []);
       setBarangays(mergedBarangays);
     } catch (loadError: unknown) {
-      setBarangays(BARANGAYS);
+      setBarangays(MABINI_BARANGAYS_UPPERCASE);
       setError(getErrorMessage(loadError, "Failed to load data"));
     } finally {
       setLoading(false);

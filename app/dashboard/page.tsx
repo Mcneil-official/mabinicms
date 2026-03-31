@@ -30,6 +30,12 @@ import { getYakakApplications } from "@/lib/queries/yakap";
 import { format } from "date-fns";
 import type { YakakApplication } from "@/lib/types";
 
+type DashboardAnalyticsResponse = {
+  kpis?: {
+    totalResidents?: number;
+  };
+};
+
 const BarangayGisMapIntegrated = dynamic(
   () =>
     import("@/components/dashboard/barangay-gis-map-integrated").then(
@@ -88,7 +94,7 @@ export default function DashboardPage() {
     pending_yakap: 0,
     approved_yakap: 0,
     returned_submissions: 0,
-    total_residents: 342,
+    total_residents: 0,
     total_applications: 0,
   });
 
@@ -119,6 +125,21 @@ export default function DashboardPage() {
       );
       const allApplications = allApps.data || [];
 
+      let totalResidents = 0;
+      try {
+        const analyticsResponse = await fetch("/api/dashboard/analytics", {
+          cache: "no-store",
+        });
+
+        if (analyticsResponse.ok) {
+          const analyticsData =
+            (await analyticsResponse.json()) as DashboardAnalyticsResponse;
+          totalResidents = Number(analyticsData?.kpis?.totalResidents || 0);
+        }
+      } catch (analyticsError) {
+        console.error("[fetchDashboardAnalytics]", analyticsError);
+      }
+
       setStats({
         pending_submissions: 0, // This would need a separate submissions table
         pending_yakap: allApplications.filter((app) => app.status === "pending")
@@ -129,7 +150,7 @@ export default function DashboardPage() {
         returned_submissions: allApplications.filter(
           (app) => app.status === "returned",
         ).length,
-        total_residents: 342, // This would need a separate query
+        total_residents: totalResidents,
         total_applications: allApplications.length,
       });
 
