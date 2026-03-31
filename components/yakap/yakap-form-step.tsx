@@ -21,36 +21,7 @@ import {
 } from "@/components/ui/card";
 import { AlertCircle, Loader2, CheckCircle2, ChevronLeft } from "lucide-react";
 import { yakapService, type YakapFormData } from "@/lib/services/yakap.service";
-
-const BARANGAYS = [
-  "ABELLA",
-  "DAYANGDANG",
-  "PEÑAFRANCIA",
-  "BAGUMBAYAN NORTE",
-  "DEL ROSARIO",
-  "SABANG",
-  "BAGUMBAYAN SUR",
-  "DINAGA",
-  "SAN FELIPE",
-  "BALATAS",
-  "IGUALDAD INTERIOR",
-  "SAN FRANCISCO (POB.)",
-  "CALAUAG",
-  "LERMA",
-  "SAN ISIDRO",
-  "CARARAYAN",
-  "LIBOTON",
-  "SANTA CRUZ",
-  "CAROLINA",
-  "MABOLO",
-  "TABUCO",
-  "CONCEPCION GRANDE",
-  "PACOL",
-  "TINAGO",
-  "CONCEPCION PEQUEÑO",
-  "PANICUASON",
-  "TRIANGULO",
-];
+import { MABINI_BARANGAYS } from "@/lib/constants/barangays";
 
 interface YakapFormStepProps {
   residentId: string;
@@ -511,7 +482,7 @@ export function YakapFormStep({
                         <SelectValue placeholder="Select barangay" />
                       </SelectTrigger>
                       <SelectContent>
-                        {BARANGAYS.map((barangay) => (
+                        {MABINI_BARANGAYS.map((barangay) => (
                           <SelectItem key={barangay} value={barangay}>
                             {barangay}
                           </SelectItem>

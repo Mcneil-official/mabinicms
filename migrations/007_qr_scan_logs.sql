@@ -1,5 +1,5 @@
 -- Migration: QR Scan Activity Log
--- Feature: NagaCare QR Scanner — audit every scan made by health workers
+-- Feature: MabiniCare QR Scanner — audit every scan made by health workers
 
 -- ============================================================
 -- TABLE: qr_scan_logs

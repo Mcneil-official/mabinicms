@@ -4,30 +4,30 @@ import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Camera, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import type { NagaCareQRPayload } from "@/lib/types";
+import type { MabiniCareQRPayload } from "@/lib/types";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function validatePayload(raw: string): NagaCareQRPayload | null {
+function validatePayload(raw: string): MabiniCareQRPayload | null {
   try {
     const parsed = JSON.parse(raw);
     if (
-      parsed?.type !== "nagacare_resident" ||
+      parsed?.type !== "mabinicare_resident" ||
       parsed?.v !== 1 ||
       typeof parsed?.id !== "string" ||
       !UUID_REGEX.test(parsed.id)
     ) {
       return null;
     }
-    return parsed as NagaCareQRPayload;
+    return parsed as MabiniCareQRPayload;
   } catch {
     return null;
   }
 }
 
 interface QRScannerProps {
-  onScan: (payload: NagaCareQRPayload) => void;
+  onScan: (payload: MabiniCareQRPayload) => void;
 }
 
 export function QRScanner({ onScan }: QRScannerProps) {
@@ -58,7 +58,7 @@ export function QRScanner({ onScan }: QRScannerProps) {
           const payload = validatePayload(decodedText);
           if (!payload) {
             setScanError(
-              "Invalid or unrecognized QR code. This is not a NagaCare Health ID.",
+              "Invalid or unrecognized QR code. This is not a MabiniCare Health ID.",
             );
             return;
           }
@@ -109,7 +109,7 @@ export function QRScanner({ onScan }: QRScannerProps) {
 
       {!loading && (
         <p className="text-center text-xs text-slate-500">
-          Point the camera at a resident&apos;s NagaCare QR code.
+          Point the camera at a resident&apos;s MabiniCare QR code.
         </p>
       )}
     </div>

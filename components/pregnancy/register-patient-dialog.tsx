@@ -23,36 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createResidentAction } from "@/lib/actions/create-resident";
-
-const BARANGAYS = [
-  "ABELLA",
-  "BAGUMBAYAN NORTE",
-  "BAGUMBAYAN SUR",
-  "BALATAS",
-  "CALAUAG",
-  "CARARAYAN",
-  "CAROLINA",
-  "CONCEPCION GRANDE",
-  "CONCEPCION PEQUEÑO",
-  "DAYANGDANG",
-  "DEL ROSARIO",
-  "DINAGA",
-  "IGUALDAD INTERIOR",
-  "LERMA",
-  "LIBOTON",
-  "MABOLO",
-  "PACOL",
-  "PANICUASON",
-  "PEÑAFRANCIA",
-  "SABANG",
-  "SAN FELIPE",
-  "SAN FRANCISCO (POB.)",
-  "SAN ISIDRO",
-  "SANTA CRUZ",
-  "TABUCO",
-  "TINAGO",
-  "TRIANGULO",
-];
+import { MABINI_BARANGAYS } from "@/lib/constants/barangays";
 
 const EMPTY_FORM = {
   full_name: "",
@@ -194,7 +165,7 @@ export function RegisterPatientDialog({
                   <SelectValue placeholder="Select barangay" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {BARANGAYS.map((b) => (
+                  {MABINI_BARANGAYS.map((b) => (
                     <SelectItem key={b} value={b}>
                       {b}
                     </SelectItem>

@@ -1,7 +1,7 @@
-# RBAC System Design - NagaCMS
+# RBAC System Design - MabiniCare
 
 ## Overview
-This document outlines the comprehensive Role-Based Access Control (RBAC) system for NagaCMS supporting three distinct user roles: Work Health, Barangay Health, and Admin.
+This document outlines the comprehensive Role-Based Access Control (RBAC) system for MabiniCare supporting three distinct user roles: Work Health, Barangay Health, and Admin.
 
 ---
 

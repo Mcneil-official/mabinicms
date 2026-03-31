@@ -1,4 +1,4 @@
-# NagaCMS - Barangay Health Dashboard
+# MabiniCare - Barangay Health Dashboard
 
 A comprehensive, GIS-enabled community health information system built with Next.js and Supabase.
 

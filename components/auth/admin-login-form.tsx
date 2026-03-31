@@ -22,10 +22,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
-import { workerLoginAction } from "@/lib/actions/worker-auth";
-import { AlertCircle, Eye, EyeOff, Loader2, Users } from "lucide-react";
+import { adminLoginAction } from "@/lib/actions/admin-auth";
+import { AlertCircle, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 
-export function WorkerLoginForm() {
+export function AdminLoginForm() {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +44,7 @@ export function WorkerLoginForm() {
     setError(null);
 
     try {
-      const result = await workerLoginAction(data);
+      const result = await adminLoginAction(data);
 
       if (!result.success) {
         setError(result.error || "Login failed");
@@ -52,9 +52,8 @@ export function WorkerLoginForm() {
         return;
       }
 
-      // Redirect to workers dashboard
-      router.push("/dashboard-workers");
-    } catch (err) {
+      router.push("/dashboard");
+    } catch {
       setError("An unexpected error occurred");
       setIsPending(false);
     }
@@ -64,12 +63,10 @@ export function WorkerLoginForm() {
     <Card className="w-full">
       <CardHeader className="space-y-1">
         <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-slate-700 dark:text-slate-300" />
-          <CardTitle className="text-2xl">City Health Login</CardTitle>
+          <ShieldCheck className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+          <CardTitle className="text-2xl">Admin Login</CardTitle>
         </div>
-        <CardDescription>
-          Enter your worker credentials to continue
-        </CardDescription>
+        <CardDescription>Enter your administrator credentials</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -86,12 +83,12 @@ export function WorkerLoginForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City Health Staff Username</FormLabel>
+                  <FormLabel>Admin Username</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type="text"
-                      placeholder="Enter your worker username"
+                      placeholder="Enter your admin username"
                       disabled={isPending}
                       autoComplete="username"
                     />
@@ -139,18 +136,14 @@ export function WorkerLoginForm() {
               )}
             />
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending}
-            >
+            <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
-                "Sign In as City Health Staff"
+                "Sign In as Admin"
               )}
             </Button>
           </form>

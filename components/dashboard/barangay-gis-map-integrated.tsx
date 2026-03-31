@@ -22,7 +22,7 @@ interface BarangayGisMapIntegratedProps {
 
 /**
  * Fallback vaccination data for initial dashboard use
- * Using all 27 actual barangays from Naga City, Bicol
+ * Using all barangays from Mabini, Batangas
  */
 function getFallbackData(): BarangayVaccinationData[] {
   return fallbackBarangayHealthData.map((record) => ({ ...record }));
@@ -43,8 +43,8 @@ function getFallbackData(): BarangayVaccinationData[] {
 export function BarangayGisMapIntegrated({
   data,
   useFallbackData = true,
-  title = "Naga City Barangay Health Coverage",
-  description = "Interactive marker-based visualization of vaccination coverage across Naga City, Bicol barangays",
+  title = "Mabini Barangay Health Coverage",
+  description = "Interactive marker-based visualization of vaccination coverage across Mabini, Batangas barangays",
   mapHeight = "h-[600px]",
   showLegend = true,
   showMapLegend = true,

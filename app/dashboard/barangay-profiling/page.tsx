@@ -145,7 +145,7 @@ export default function BarangayProfilingPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-            Barangay & Pregnancy Profiling
+            Barangay Profiling
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Manage merged barangay profiling, pregnancy details, and health histories

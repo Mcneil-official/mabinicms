@@ -20,36 +20,7 @@ import {
 } from "@/components/ui/card";
 import { AlertCircle, Loader2, CheckCircle2, X } from "lucide-react";
 import type { Resident } from "@/lib/types";
-
-const BARANGAYS = [
-  "ABELLA",
-  "DAYANGDANG",
-  "PEÑAFRANCIA",
-  "BAGUMBAYAN NORTE",
-  "DEL ROSARIO",
-  "SABANG",
-  "BAGUMBAYAN SUR",
-  "DINAGA",
-  "SAN FELIPE",
-  "BALATAS",
-  "IGUALDAD INTERIOR",
-  "SAN FRANCISCO (POB.)",
-  "CALAUAG",
-  "LERMA",
-  "SAN ISIDRO",
-  "CARARAYAN",
-  "LIBOTON",
-  "SANTA CRUZ",
-  "CAROLINA",
-  "MABOLO",
-  "TABUCO",
-  "CONCEPCION GRANDE",
-  "PACOL",
-  "TINAGO",
-  "CONCEPCION PEQUEÑO",
-  "PANICUASON",
-  "TRIANGULO",
-];
+import { MABINI_BARANGAYS } from "@/lib/constants/barangays";
 
 interface YakakFormProps {
   residents: Resident[];
@@ -87,7 +58,7 @@ export function YakakForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Filter barangays based on search
-  const filteredBarangays = BARANGAYS.filter((b) =>
+  const filteredBarangays = MABINI_BARANGAYS.filter((b) =>
     b.toLowerCase().includes(barangaySearch.toLowerCase()),
   );
 

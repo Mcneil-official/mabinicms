@@ -58,9 +58,9 @@ export default function Page() {
             </span>
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                City Health Platform
+                Municipal Health Platform
               </p>
-              <h1 className="text-lg font-bold sm:text-xl">NAGA CMS</h1>
+              <h1 className="text-lg font-bold sm:text-xl">MabiniCare</h1>
             </div>
           </div>
           <div className="hidden items-center gap-2 sm:flex">
@@ -71,7 +71,7 @@ export default function Page() {
               Worker Login
             </Link>
             <Link
-              href="/auth/login"
+              href="/auth/admin"
               className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               Admin Login
@@ -88,7 +88,7 @@ export default function Page() {
               One Health Data System for Every Barangay.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              NAGA CMS centralizes profiling, monitoring, and reporting for
+              MabiniCare centralizes profiling, monitoring, and reporting for
               barangay health services. Built for administrators and field
               workers, it keeps records organized and ready for action.
             </p>
@@ -144,7 +144,8 @@ export default function Page() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p>
-            Naga City Community Management System • Barangay Health Operations
+            MabiniCare Community Health Management System • Barangay Health
+            Operations
           </p>
           <p className="font-medium text-foreground">Version 1.0</p>
         </div>

@@ -158,7 +158,7 @@ ALTER TABLE public.offline_queue ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 
 -- VACCINATION RECORDS POLICIES
-CREATE POLICY IF NOT EXISTS "health_workers_view_vaccination_records"
+CREATE POLICY "health_workers_view_vaccination_records"
   ON public.vaccination_records FOR SELECT
   USING (
     EXISTS (
@@ -172,7 +172,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_view_vaccination_records"
     )
   );
 
-CREATE POLICY IF NOT EXISTS "health_workers_insert_vaccination_records"
+CREATE POLICY "health_workers_insert_vaccination_records"
   ON public.vaccination_records FOR INSERT
   WITH CHECK (
     EXISTS (
@@ -186,7 +186,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_insert_vaccination_records"
     )
   );
 
-CREATE POLICY IF NOT EXISTS "health_workers_update_vaccination_records"
+CREATE POLICY "health_workers_update_vaccination_records"
   ON public.vaccination_records FOR UPDATE
   USING (
     administered_by::text = auth.uid()::text
@@ -202,7 +202,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_update_vaccination_records"
   );
 
 -- MATERNAL HEALTH RECORDS POLICIES
-CREATE POLICY IF NOT EXISTS "health_workers_view_maternal_health"
+CREATE POLICY "health_workers_view_maternal_health"
   ON public.maternal_health_records FOR SELECT
   USING (
     EXISTS (
@@ -216,7 +216,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_view_maternal_health"
     )
   );
 
-CREATE POLICY IF NOT EXISTS "health_workers_insert_maternal_health"
+CREATE POLICY "health_workers_insert_maternal_health"
   ON public.maternal_health_records FOR INSERT
   WITH CHECK (
     EXISTS (
@@ -231,7 +231,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_insert_maternal_health"
   );
 
 -- SENIOR ASSISTANCE RECORDS POLICIES
-CREATE POLICY IF NOT EXISTS "health_workers_view_senior_assistance"
+CREATE POLICY "health_workers_view_senior_assistance"
   ON public.senior_assistance_records FOR SELECT
   USING (
     EXISTS (
@@ -245,7 +245,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_view_senior_assistance"
     )
   );
 
-CREATE POLICY IF NOT EXISTS "health_workers_insert_senior_assistance"
+CREATE POLICY "health_workers_insert_senior_assistance"
   ON public.senior_assistance_records FOR INSERT
   WITH CHECK (
     EXISTS (
@@ -260,7 +260,7 @@ CREATE POLICY IF NOT EXISTS "health_workers_insert_senior_assistance"
   );
 
 -- HEALTH METRICS POLICIES
-CREATE POLICY IF NOT EXISTS "health_workers_view_health_metrics"
+CREATE POLICY "health_workers_view_health_metrics"
   ON public.health_metrics FOR SELECT
   USING (
     EXISTS (
@@ -272,14 +272,15 @@ CREATE POLICY IF NOT EXISTS "health_workers_view_health_metrics"
   );
 
 -- OFFLINE QUEUE POLICIES
-CREATE POLICY IF NOT EXISTS "users_view_own_queue"
+CREATE POLICY "users_view_own_queue"
   ON public.offline_queue FOR SELECT
   USING (user_id::text = auth.uid()::text);
 
-CREATE POLICY IF NOT EXISTS "users_insert_own_queue"
+CREATE POLICY "users_insert_own_queue"
   ON public.offline_queue FOR INSERT
   WITH CHECK (user_id::text = auth.uid()::text);
 
 -- ============================================================================
 -- END OF MIGRATION
 -- ============================================================================
+

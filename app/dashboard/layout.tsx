@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
 export const metadata = {
-  title: "Dashboard - Barangay Health System",
+  title: "Dashboard - MabiniCare",
 };
 
 export default async function DashboardRootLayout({

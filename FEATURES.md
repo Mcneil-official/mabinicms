@@ -1,6 +1,6 @@
-# NagaCMS System Features
+# MabiniCare System Features
 
-This document explains all the features of the Barangay Health System. It is divided into two main sections based on who uses them: **Staff** and **Health Workers**.
+This document explains all the features of MabiniCare. It is divided into two main sections based on who uses them: **Staff** and **Health Workers**.
 
 ---
 

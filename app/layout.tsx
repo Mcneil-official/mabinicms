@@ -14,14 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Health Workers - Barangay Health Dashboard",
+  title: "MabiniCare - Barangay Health Dashboard",
   description:
-    "Mobile-first health worker data entry system with offline capability for barangay health centers",
+    "Mobile-first health worker data entry system with offline capability for Mabini barangay health centers",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Health Workers",
+    title: "MabiniCare",
   },
   formatDetection: {
     telephone: true,
@@ -54,7 +54,7 @@ export default function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        <meta name="apple-mobile-web-app-title" content="Health Workers" />
+        <meta name="apple-mobile-web-app-title" content="MabiniCare" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
