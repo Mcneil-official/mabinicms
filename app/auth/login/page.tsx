@@ -28,17 +28,20 @@ export default async function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4 dark:from-slate-950 dark:to-slate-900">
-      <Button
-        asChild
-        variant="ghost"
-        size="icon"
-        className="absolute left-4 top-4 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-      >
-        <Link href="/" aria-label="Go to landing page">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-      </Button>
       <div className="w-full max-w-md">
+        <div className="mb-3 flex justify-start">
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="border-slate-300/70 bg-white/80 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-200 dark:hover:bg-slate-800/60"
+          >
+            <Link href="/" aria-label="Back to Home" title="Back to Home">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
             Health System
@@ -53,18 +56,6 @@ export default async function LoginPage() {
         <div className="mt-6 rounded-lg bg-blue-50 p-4 text-sm text-blue-700 dark:bg-blue-950 dark:text-blue-200">
           <p className="font-medium">Demo Credentials (Testing)</p>
           <p className="mt-1 text-xs">Contact your administrator for access</p>
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Are you a community City Health Worker?{" "}
-            <Link
-              href="/auth/workers"
-              className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Login as Worker
-            </Link>
-          </p>
         </div>
       </div>
     </div>

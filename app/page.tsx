@@ -65,10 +65,16 @@ export default function Page() {
           </div>
           <div className="hidden items-center gap-2 sm:flex">
             <Link
+              href="/auth/login"
+              className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
+            >
+              Barangay Staff Login
+            </Link>
+            <Link
               href="/auth/workers"
               className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
-              Worker Login
+              City Worker Login
             </Link>
             <Link
               href="/auth/admin"
