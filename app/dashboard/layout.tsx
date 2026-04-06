@@ -25,8 +25,8 @@ export default async function DashboardRootLayout({
     redirect("/dashboard-workers");
   }
 
-  // Keep /dashboard for admin, barangay_admin, and staff only
-  if (role !== "admin" && role !== "barangay_admin" && role !== "staff") {
+  // Keep /dashboard for admin and staff only
+  if (role !== "admin" && role !== "staff") {
     redirect("/auth/login");
   }
 

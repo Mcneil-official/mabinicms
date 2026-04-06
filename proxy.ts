@@ -53,8 +53,8 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Route workers away from staff/CHO dashboards
-    if (pathname.startsWith("/dashboard-barangay") && userRole !== "barangay_admin" && userRole !== "staff") {
+    // Route workers away from staff dashboards
+    if (pathname.startsWith("/dashboard-barangay") && userRole !== "staff") {
       const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard";
       return NextResponse.redirect(new URL(target, request.url));
     }
@@ -71,12 +71,11 @@ export async function proxy(request: NextRequest) {
 
     if (healthWorkerRoute && userRole !== "workers") {
       // Non-health workers trying to access health worker routes
-      const approporiateRoute =
-        userRole === "staff" || userRole === "barangay_admin" ? "/dashboard" : "/dashboard";
+      const approporiateRoute = userRole === "staff" ? "/dashboard" : "/dashboard";
       return NextResponse.redirect(new URL(approporiateRoute, request.url));
     }
 
-    if (staffRoute && userRole !== "staff" && userRole !== "admin" && userRole !== "barangay_admin") {
+    if (staffRoute && userRole !== "staff" && userRole !== "admin") {
       // Non-staff trying to access staff routes
       const appropriateRoute =
         userRole === "workers"

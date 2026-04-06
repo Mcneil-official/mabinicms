@@ -7,7 +7,7 @@ import type { User } from "@/lib/types";
  * Fetch all internal staff users (admin only)
  */
 export async function getStaffUsers(filters?: {
-  role?: "user" | "admin" | "barangay_admin";
+  role?: "user" | "workers" | "staff" | "admin";
   barangay?: string;
   limit?: number;
   offset?: number;

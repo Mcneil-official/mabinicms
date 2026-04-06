@@ -15,6 +15,9 @@ import {
   Calendar,
   Megaphone,
   Pill,
+  Settings,
+  History,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -60,13 +63,29 @@ const menuItems = [
   },
 ];
 
+const adminMenuItems = [
+  {
+    href: "/dashboard-admin",
+    icon: LayoutDashboard,
+    label: "Admin Overview",
+    exact: true,
+  },
+  { href: "/dashboard-admin/users", icon: Users, label: "Users" },
+  { href: "/dashboard-admin/facilities", icon: MapPin, label: "Facilities" },
+  { href: "/dashboard-admin/audit-logs", icon: History, label: "Audit Logs" },
+  { href: "/dashboard-admin/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/dashboard-admin/settings", icon: Settings, label: "Settings" },
+];
+
 export function Sidebar({ user, isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
 
-  const isAdmin = user.role === "admin";
-  const staffMenuItems = isAdmin
-    ? menuItems
-    : menuItems.filter((item) => item.href !== "/dashboard/staff");
+  const normalizedRole = (user.role || "").trim().toLowerCase();
+  const isAdmin = normalizedRole === "admin";
+  const staffMenuItems = menuItems.filter(
+    (item) => isAdmin || item.href !== "/dashboard/staff",
+  );
+  const visibleMenuItems = isAdmin ? adminMenuItems : staffMenuItems;
 
   return (
     <aside
@@ -88,7 +107,7 @@ export function Sidebar({ user, isOpen = true, onClose }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {staffMenuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.exact
               ? pathname === item.href

@@ -9,7 +9,7 @@ export async function PATCH(request: NextRequest) {
     // Only staff and admins can update appointment status
     if (
       !session ||
-      !["admin", "barangay_admin", "staff"].includes(session.user.role)
+      !["admin", "staff"].includes(session.user.role)
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

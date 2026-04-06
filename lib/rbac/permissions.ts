@@ -241,7 +241,7 @@ export function isFieldWorkerRole(role: RoleType): boolean {
  */
 export function getDashboardRoutes(role: RoleType): string[] {
   const routes: Record<RoleType, string[]> = {
-    [RoleType.ADMIN]: ["/dashboard", "/dashboard/admin", "/dashboard-workers"],
+    [RoleType.ADMIN]: ["/dashboard-admin", "/dashboard", "/dashboard-workers"],
     [RoleType.BARANGAY_HEALTH]: ["/dashboard-barangay", "/dashboard-workers", "/dashboard"],
     [RoleType.WORK_HEALTH]: ["/dashboard-workers", "/dashboard"],
   };

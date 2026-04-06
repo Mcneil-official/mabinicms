@@ -27,7 +27,7 @@ export default async function BarangayHealthDashboardRootLayout({
   // Convert role to RoleType for checking
   const roleType = dbRoleToRoleType(session.user.role);
 
-  // Only allow barangay_admin role (CHO)
+  // Only allow barangay health supervisor role (staff)
   if (roleType !== RoleType.BARANGAY_HEALTH) {
     redirect("/auth/login");
   }
