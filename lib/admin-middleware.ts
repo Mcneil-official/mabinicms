@@ -19,8 +19,10 @@ export async function requireAdminRole() {
     .eq("auth_id", user.id)
     .single();
 
-  if (userData?.role !== "admin") {
-    redirect("/dashboard");
+  const role = (userData?.role || "").trim().toLowerCase();
+
+  if (role !== "admin") {
+    redirect(role === "workers" ? "/dashboard-workers" : "/dashboard-barangay");
   }
 
   return userData;

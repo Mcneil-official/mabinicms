@@ -6,11 +6,8 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getSession();
 
-    // Only staff and admins can update appointment status
-    if (
-      !session ||
-      !["admin", "staff"].includes(session.user.role)
-    ) {
+    // Only admins can update appointment status
+    if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

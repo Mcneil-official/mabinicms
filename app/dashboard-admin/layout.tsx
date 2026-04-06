@@ -17,8 +17,10 @@ export default async function AdminDashboardRootLayout({
     redirect("/auth/admin");
   }
 
-  if ((session.user.role || "").trim().toLowerCase() !== "admin") {
-    redirect("/dashboard");
+  const role = (session.user.role || "").trim().toLowerCase();
+
+  if (role !== "admin") {
+    redirect(role === "workers" ? "/dashboard-workers" : "/dashboard-barangay");
   }
 
   return (

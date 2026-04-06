@@ -1,229 +1,471 @@
-/**
- * Barangay Health Officer Dashboard Home
- * Overview and quick access to key features
- */
-
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Users,
-  Heart,
-  AlertTriangle,
-  TrendingUp,
-  CheckCircle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertCircle,
+  CheckCircle2,
   Clock,
-  Activity,
   FileText,
+  Users,
 } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { getSession } from "@/lib/auth";
+import { getYakakApplications } from "@/lib/queries/yakap";
+import { format } from "date-fns";
+import type { YakakApplication } from "@/lib/types";
+import type { DashboardData as AnalyticsDashboardData } from "@/components/analytics/analytics-health-dashboard";
 
-interface DashboardStats {
-  totalHealthWorkers: number;
-  activeAssignments: number;
-  pregnancyCases: number;
-  highRiskCases: number;
-  pendingReports: number;
-  completedToday: number;
+type DashboardAnalyticsResponse = {
+  barangay?: string;
+  generatedAt?: string;
+  kpis?: {
+    totalResidents?: number;
+  };
+  vaccinationStatus?: AnalyticsDashboardData["vaccinationStatus"];
+  monthlyTrend?: AnalyticsDashboardData["monthlyTrend"];
+  priorityServices?: AnalyticsDashboardData["priorityServices"];
+  commonConditions?: AnalyticsDashboardData["commonConditions"];
+  insights?: AnalyticsDashboardData["insights"];
+};
+
+const BarangayGisMapIntegrated = dynamic(
+  () =>
+    import("@/components/dashboard/barangay-gis-map-integrated").then(
+      (mod) => mod.BarangayGisMapIntegrated,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Barangay Vaccination Coverage Map</CardTitle>
+          <CardDescription>Loading map...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="text-center text-gray-500">Loading map...</div>
+          </div>
+        </CardContent>
+      </Card>
+    ),
+  },
+);
+
+const AnalyticsHealthDashboard = dynamic(
+  () =>
+    import("@/components/analytics/analytics-health-dashboard").then(
+      (mod) => mod.AnalyticsHealthDashboard,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Health Indicators</CardTitle>
+          <CardDescription>Loading analytics...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[320px] rounded-lg bg-gray-100 dark:bg-gray-900" />
+        </CardContent>
+      </Card>
+    ),
+  },
+);
+
+interface StatCard {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  color: string;
 }
 
-export default function BarangayHealthDashboardHome() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalHealthWorkers: 0,
-    activeAssignments: 0,
-    pregnancyCases: 0,
-    highRiskCases: 0,
-    pendingReports: 0,
-    completedToday: 0,
-  });
+const StatCard = ({ title, value, icon, color }: StatCard) => (
+  <Card>
+    <CardContent className="pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+            {title}
+          </p>
+          <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
+            {value}
+          </p>
+        </div>
+        <div className={`rounded-lg p-3 ${color}`}>{icon}</div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+export default function DashboardPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const [recentApplications, setRecentApplications] = useState<
+    YakakApplication[]
+  >([]);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboardData | null>(null);
+  const [stats, setStats] = useState({
+    pending_submissions: 0,
+    pending_yakap: 0,
+    approved_yakap: 0,
+    returned_submissions: 0,
+    total_residents: 0,
+    total_applications: 0,
+  });
+
+  // Fetch recent YAKAP applications
+  const fetchRecentApplications = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const session = await getSession();
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Admin users have a dedicated dashboard surface.
+      if ((session.user.role || "").trim().toLowerCase() === "admin") {
+        router.replace("/dashboard-admin");
+        return;
+      }
+
+      const result = await getYakakApplications(session.user.assigned_barangay, false, {
+        limit: 1000,
+      });
+      const allApplications = result.data || [];
+      const recent = allApplications.slice(0, 10);
+      setRecentApplications(recent);
+
+      let totalResidents = 0;
+      try {
+        const analyticsResponse = await fetch("/api/dashboard-barangay/analytics", {
+          cache: "no-store",
+        });
+
+        if (analyticsResponse.ok) {
+          const analyticsData =
+            (await analyticsResponse.json()) as DashboardAnalyticsResponse;
+          totalResidents = Number(analyticsData?.kpis?.totalResidents || 0);
+
+          if (analyticsData?.kpis) {
+            setAnalyticsData({
+              barangay: analyticsData.barangay || session.user.assigned_barangay || "",
+              generatedAt: analyticsData.generatedAt || new Date().toISOString(),
+              kpis: {
+                totalResidents: Number(analyticsData.kpis.totalResidents || 0),
+                pregnancyCases: 0,
+                vaccinationCoverage: 0,
+                criticalAlerts: 0,
+              },
+              vaccinationStatus: analyticsData.vaccinationStatus || [],
+              monthlyTrend: analyticsData.monthlyTrend || [],
+              priorityServices: analyticsData.priorityServices || [],
+              commonConditions: analyticsData.commonConditions || [],
+              insights: analyticsData.insights || [],
+            });
+          }
+        }
+      } catch (analyticsError) {
+        console.error("[fetchDashboardAnalytics]", analyticsError);
+      }
+
+      setStats({
+        pending_submissions: 0, // This would need a separate submissions table
+        pending_yakap: allApplications.filter((app) => app.status === "pending")
+          .length,
+        approved_yakap: allApplications.filter(
+          (app) => app.status === "approved",
+        ).length,
+        returned_submissions: allApplications.filter(
+          (app) => app.status === "returned",
+        ).length,
+        total_residents: totalResidents,
+        total_applications: allApplications.length,
+      });
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("[fetchRecentApplications]", error);
+      setIsLoading(false);
+    }
+  }, [router]);
 
   useEffect(() => {
-    // Load dashboard statistics
-    const loadStats = async () => {
-      try {
-        // In a real implementation, fetch from API
-        // For now, set placeholder data
-        setStats({
-          totalHealthWorkers: 8,
-          activeAssignments: 24,
-          pregnancyCases: 12,
-          highRiskCases: 3,
-          pendingReports: 5,
-          completedToday: 18,
-        });
-      } catch (error) {
-        console.error("Failed to load dashboard stats:", error);
-      } finally {
-        setIsLoading(false);
+    fetchRecentApplications();
+  }, [fetchRecentApplications]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const revealDeferredSections = () => {
+      if (!cancelled) {
+        setShowDeferredSections(true);
       }
     };
 
-    loadStats();
+    if (typeof window === "undefined") {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if ("requestIdleCallback" in window) {
+      const idleWindow = window as Window & {
+        requestIdleCallback: typeof window.requestIdleCallback;
+        cancelIdleCallback: typeof window.cancelIdleCallback;
+      };
+      const idleId = idleWindow.requestIdleCallback(revealDeferredSections, {
+        timeout: 1500,
+      });
+
+      return () => {
+        cancelled = true;
+        idleWindow.cancelIdleCallback(idleId);
+      };
+    }
+
+    const timeoutId = globalThis.setTimeout(revealDeferredSections, 300);
+
+    return () => {
+      cancelled = true;
+      globalThis.clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Page Header */}
       <div>
-        <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
-          Barangay Health Officer Dashboard
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          Dashboard
         </h1>
         <p className="mt-2 text-slate-600 dark:text-slate-400">
-          Oversee health workers, monitor indicators, and manage community health initiatives
+          Welcome back. Here's an overview of your health system.
         </p>
       </div>
 
-      {/* Alert Section */}
-      {stats.highRiskCases > 0 && (
-        <Alert className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="ml-4 text-red-800 dark:text-red-200">
-            <strong>{stats.highRiskCases} high-risk cases</strong> require immediate attention. Review
-            prenatal monitoring and medical alerts.
-          </AlertDescription>
-        </Alert>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          title="Pending Submissions"
+          value={stats.pending_submissions}
+          icon={<Clock className="h-6 w-6 text-amber-600" />}
+          color="bg-amber-50 dark:bg-amber-950"
+        />
+        <StatCard
+          title="Pending YAKAP"
+          value={stats.pending_yakap}
+          icon={<AlertCircle className="h-6 w-6 text-yellow-600" />}
+          color="bg-yellow-50 dark:bg-yellow-950"
+        />
+        <StatCard
+          title="Approved YAKAP"
+          value={stats.approved_yakap}
+          icon={<CheckCircle2 className="h-6 w-6 text-green-600" />}
+          color="bg-green-50 dark:bg-green-950"
+        />
+        <StatCard
+          title="Returned Submissions"
+          value={stats.returned_submissions}
+          icon={<FileText className="h-6 w-6 text-red-600" />}
+          color="bg-red-50 dark:bg-red-950"
+        />
+        <StatCard
+          title="Total Residents"
+          value={stats.total_residents}
+          icon={<Users className="h-6 w-6 text-blue-600" />}
+          color="bg-blue-50 dark:bg-blue-950"
+        />
+        <StatCard
+          title="Total Applications"
+          value={stats.total_applications}
+          icon={<FileText className="h-6 w-6 text-indigo-600" />}
+          color="bg-indigo-50 dark:bg-indigo-950"
+        />
+      </div>
+
+      {showDeferredSections ? (
+        <>
+          {/* Barangay Vaccination Coverage GIS Map */}
+          <section>
+            <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
+              Health Coverage by Barangay
+            </h2>
+            <BarangayGisMapIntegrated
+              useFallbackData={true}
+              mapHeight="h-[600px]"
+              showLegend={true}
+              showMapLegend={true}
+            />
+          </section>
+
+          {/* Health Indicators merged into dashboard for staff */}
+          <section>
+            <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
+              Health Indicators
+            </h2>
+            <AnalyticsHealthDashboard
+              endpoint="/api/dashboard-barangay/analytics"
+              initialData={analyticsData}
+            />
+          </section>
+        </>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Health Coverage by Barangay</CardTitle>
+              <CardDescription>
+                Preparing the interactive coverage map...
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[260px] rounded-lg bg-slate-100 dark:bg-slate-900" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Health Indicators</CardTitle>
+              <CardDescription>
+                Preparing analytics and indicators...
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[260px] rounded-lg bg-slate-100 dark:bg-slate-900" />
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* Key Metrics */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Health Workers */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Health Workers</CardTitle>
-            <Users className="h-4 w-4 text-slate-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalHealthWorkers}</div>
-            <p className="text-xs text-slate-500">Active in your barangay</p>
-          </CardContent>
-        </Card>
-
-        {/* Active Assignments */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Assignments</CardTitle>
-            <Activity className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeAssignments}</div>
-            <p className="text-xs text-slate-500">Cases under supervision</p>
-          </CardContent>
-        </Card>
-
-        {/* Pregnancy Cases */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pregnancy Cases</CardTitle>
-            <Heart className="h-4 w-4 text-pink-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pregnancyCases}</div>
-            <p className="text-xs text-slate-500">Currently being monitored</p>
-          </CardContent>
-        </Card>
-
-        {/* High Risk Cases */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Risk</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.highRiskCases}</div>
-            <p className="text-xs text-slate-500">Requiring attention</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions & Status */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Pending Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Pending Reports
-            </CardTitle>
-            <CardDescription>Awaiting review and approval</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Field Reports Pending</span>
-              <Badge variant="outline">{stats.pendingReports}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Completed Today</span>
-              <Badge className="bg-green-100 text-green-800">{stats.completedToday}</Badge>
-            </div>
-            <Button asChild variant="outline" className="mt-4 w-full">
-              <Link href="/dashboard-barangay/reports">Review Reports</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Quick Access */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Quick Access
-            </CardTitle>
-            <CardDescription>Frequently used features</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link href="/dashboard-barangay/health-workers">Manage Health Workers</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link href="/dashboard-barangay/residents">View Residents</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link href="/dashboard-barangay/analytics">Analytics & Reports</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link href="/dashboard-barangay/pregnancy-monitoring">Pregnancy Monitoring</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Worker Performance */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Worker Performance This Week
-          </CardTitle>
-          <CardDescription>Service delivery and submission rates</CardDescription>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>
+            Latest YAKAP applications ({recentApplications.length} total)
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { name: "Maria Santos", submissions: 24, target: 25 },
-              { name: "John Reyes", submissions: 22, target: 25 },
-              { name: "Rosa Cruz", submissions: 20, target: 25 },
-            ].map((worker) => (
-              <div key={worker.name}>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{worker.name}</span>
-                  <span className="text-slate-500">
-                    {worker.submissions}/{worker.target} submissions
-                  </span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                  <div
-                    className="h-full bg-blue-500"
-                    style={{ width: `${(worker.submissions / worker.target) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="p-8 text-center text-gray-500">
+              <p>Loading recent activity...</p>
+            </div>
+          ) : recentApplications.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <p>No recent YAKAP applications</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 dark:bg-gray-900">
+                    <TableHead className="font-semibold">
+                      Resident Name
+                    </TableHead>
+                    <TableHead className="font-semibold">Barangay</TableHead>
+                    <TableHead className="font-semibold">
+                      Membership Type
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      PhilHealth No.
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      Applied Date
+                    </TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentApplications.map((app) => {
+                    const getStatusColor = (status: string) => {
+                      switch (status) {
+                        case "pending":
+                          return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+                        case "approved":
+                          return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+                        case "returned":
+                          return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+                        case "rejected":
+                          return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                        default:
+                          return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+                      }
+                    };
+
+                    const getMembershipBadgeColor = (type: string) => {
+                      switch (type) {
+                        case "individual":
+                          return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700";
+                        case "family":
+                          return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700";
+                        case "senior":
+                          return "bg-green-50 text-green-700 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700";
+                        case "pwd":
+                          return "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700";
+                        default:
+                          return "bg-gray-50 text-gray-700 border-gray-200";
+                      }
+                    };
+
+                    return (
+                      <TableRow
+                        key={app.id}
+                        className="border-b hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                      >
+                        <TableCell className="font-medium">
+                          {app.resident_name}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {app.barangay}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`capitalize ${getMembershipBadgeColor(app.membership_type)}`}
+                          >
+                            {app.membership_type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                          {app.philhealth_no || "—"}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                          {format(new Date(app.applied_at), "MMM dd, yyyy")}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={`capitalize ${getStatusColor(app.status)}`}
+                          >
+                            {app.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

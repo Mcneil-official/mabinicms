@@ -91,6 +91,7 @@ interface MedicationSuggestion {
 
 interface MedicationApiResponse {
   mode: ModuleMode;
+  can_manage?: boolean;
   barangay?: string;
   barangays?: string[];
   items: MedicationInventoryItem[];
@@ -132,6 +133,7 @@ export function MedicationInventoryModule({
   defaultMode = "cho",
 }: MedicationInventoryModuleProps) {
   const [mode, setMode] = useState<ModuleMode>(defaultMode);
+  const [canManage, setCanManage] = useState(false);
   const [items, setItems] = useState<MedicationInventoryItem[]>([]);
   const [history, setHistory] = useState<MedicationHistoryItem[]>([]);
   const [alerts, setAlerts] = useState<MedicationAlert[]>([]);
@@ -163,6 +165,7 @@ export function MedicationInventoryModule({
       }
 
       setMode(payload.mode || defaultMode);
+      setCanManage(Boolean(payload.can_manage));
       setItems(payload.items || []);
       setHistory(payload.history || []);
       setAlerts(payload.alerts || []);
@@ -229,6 +232,7 @@ export function MedicationInventoryModule({
   }, [loadData]);
 
   const isCho = mode === "cho";
+  const canRunDistribution = isCho;
 
   const medicationOptions = useMemo(
     () =>
@@ -364,6 +368,46 @@ export function MedicationInventoryModule({
     }
   };
 
+  const handleDeleteMedication = async (medicationId: string) => {
+    const confirmed = window.confirm(
+      "Delete this medication? This action cannot be undone.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch(`/api/medications/${medicationId}`, {
+        method: "DELETE",
+      });
+
+      const responsePayload = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        throw new Error(responsePayload.error || "Failed to delete medication");
+      }
+
+      if (editingId === medicationId) {
+        resetMedicationForm();
+      }
+
+      setMessage("Medication deleted.");
+      await loadData();
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete medication",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -373,7 +417,9 @@ export function MedicationInventoryModule({
         <p className="mt-2 text-slate-600 dark:text-slate-400">
           {isCho
             ? "CHO-managed centralized medication stocks, allocations, and dispensing audit."
-            : `View-only stock monitoring for ${workerBarangay || "your barangay"}.`}
+            : canManage
+              ? `Manage medication inventory for ${workerBarangay || "your barangay"}.`
+              : `View-only stock monitoring for ${workerBarangay || "your barangay"}.`}
         </p>
       </div>
 
@@ -446,7 +492,7 @@ export function MedicationInventoryModule({
         </Card>
       </div>
 
-      {isCho ? (
+      {canManage ? (
         <div className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
@@ -549,7 +595,8 @@ export function MedicationInventoryModule({
             </CardContent>
           </Card>
 
-          <Card>
+          {canRunDistribution ? (
+            <Card>
             <CardHeader>
               <CardTitle>Inventory Action</CardTitle>
               <CardDescription>
@@ -702,7 +749,8 @@ export function MedicationInventoryModule({
                 {distributionSubmitting ? "Processing..." : "Record Action"}
               </Button>
             </CardContent>
-          </Card>
+            </Card>
+          ) : null}
         </div>
       ) : null}
 
@@ -730,7 +778,7 @@ export function MedicationInventoryModule({
                   <TableHead>Allocated</TableHead>
                   <TableHead>Expiration</TableHead>
                   <TableHead>Status</TableHead>
-                  {isCho ? <TableHead>Actions</TableHead> : null}
+                  {canManage ? <TableHead>Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -762,15 +810,25 @@ export function MedicationInventoryModule({
                         ) : null}
                       </div>
                     </TableCell>
-                    {isCho ? (
+                    {canManage ? (
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditMedication(item)}
-                        >
-                          Edit
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditMedication(item)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteMedication(item.id)}
+                            disabled={submitting}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     ) : null}
                   </TableRow>
@@ -779,7 +837,7 @@ export function MedicationInventoryModule({
                 {items.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={isCho ? 9 : 8}
+                      colSpan={canManage ? 9 : 8}
                       className="text-center text-sm text-slate-500 dark:text-slate-400"
                     >
                       No medications found.

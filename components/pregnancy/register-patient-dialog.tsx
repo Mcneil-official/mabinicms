@@ -78,7 +78,7 @@ export function RegisterPatientDialog({
 
       // Notify parent to refresh, then navigate to the new profile form
       onCreated?.(result.id);
-      router.push(`/dashboard/pregnancy/${result.id}`);
+      router.push(`/dashboard-barangay/pregnancy/${result.id}`);
     });
   }
 

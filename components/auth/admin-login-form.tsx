@@ -52,7 +52,7 @@ export function AdminLoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard-admin");
     } catch {
       setError("An unexpected error occurred");
       setIsPending(false);

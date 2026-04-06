@@ -14,6 +14,9 @@ export default async function StaffLoginPage() {
   const session = await getSession();
   if (session) {
     const role = (session.user.role || "").trim().toLowerCase();
+    if (role === "staff") {
+      redirect("/dashboard-barangay");
+    }
 
     if (role === "workers") {
       redirect("/dashboard-workers");
@@ -21,11 +24,6 @@ export default async function StaffLoginPage() {
 
     if (role === "admin") {
       redirect("/dashboard-admin");
-    }
-
-    // Staff should use the original staff dashboard experience.
-    if (role === "staff") {
-      redirect("/dashboard");
     }
   }
 

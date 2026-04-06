@@ -53,7 +53,7 @@ export function LoginForm() {
       }
 
       // If we reach here, redirect happened in Server Action
-      router.push("/dashboard");
+      router.push("/dashboard-barangay");
     } catch (err) {
       setError("An unexpected error occurred");
       setIsPending(false);

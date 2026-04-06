@@ -249,8 +249,8 @@ export function Sidebar() {
       show: auth.hasPermission(Permission.VIEW_ANALYTICS),
     },
     {
-      label: "Staff Management",
-      href: "/dashboard/staff",
+      label: "Users",
+      href: "/dashboard-admin/users",
       show: auth.hasPermission(Permission.MANAGE_USERS),
     },
   ];
@@ -308,11 +308,11 @@ export function UserProfile() {
 
 | Role | Primary Dashboard | Alternative Access |
 |------|---|---|
-| **Admin** | `/dashboard` | View all barangay data, staff management |
-| **Barangay Health** | `/dashboard-barangay` | Oversee workers, monitor residents |
+| **Admin** | `/dashboard-admin` | View all barangay data, user management |
+| **Barangay Health Staff** | `/dashboard` | Oversee workers, monitor residents |
 | **Health Worker** | `/dashboard-workers` | Field services, record submission |
 
-### Automatic Redirect on Login
+      label: "Users",
 
 Users are automatically redirected to their role-specific dashboard after authentication (handled in middleware).
 
@@ -335,9 +335,9 @@ Users are automatically redirected to their role-specific dashboard after authen
 - ✅ VIEW_AUDIT_LOGS
 - ✅ All feature access permissions
 
-### Barangay Health Permissions
+### Barangay Health Staff Permissions
 - ✅ VIEW_BARANGAY_DASHBOARD
-- ✅ VIEW_WORKER_DASHBOARD (read-only)
+- ❌ VIEW_WORKER_DASHBOARD
 - ✅ VIEW_ANALYTICS
 - ✅ VIEW_REPORTS
 - ✅ CREATE_RECORDS
@@ -466,13 +466,13 @@ Create these test accounts in your database:
 | Username | Role | Barangay | Purpose |
 |---|---|---|---|
 | admin@test | admin | - | Full system access |
-| cho@barangay1 | barangay_admin | Barangay 1 | CHO for Barangay 1 |
+| staff@barangay1 | staff | Barangay 1 | Barangay Health Staff for Barangay 1 |
 | worker@barangay1 | workers | Barangay 1 | Health worker in Barangay 1 |
 
 ### Test Checklist
 
 - [ ] Admin can access all dashboards
-- [ ] CHO can only see their assigned barangay
+- [ ] Barangay Health Staff can only see their assigned barangay
 - [ ] Workers can only submit records for their barangay
 - [ ] API endpoints return 403 for unauthorized roles
 - [ ] Sidebar shows correct menu items per role
@@ -553,9 +553,9 @@ console.log("Permissions:", getPermissions(userRole));
 | `middleware.ts` | NEW | Route protection |
 | `app/api/auth/session/route.ts` | NEW | Session API endpoint |
 | `lib/api-authorization.ts` | NEW | API endpoint protections |
-| `app/dashboard-barangay/layout.tsx` | NEW | CHO dashboard layout |
-| `app/dashboard-barangay/page.tsx` | NEW | CHO dashboard home |
-| `components/layout/barangay-health-dashboard-layout.tsx` | NEW | CHO UI layout |
+| `app/dashboard-barangay/layout.tsx` | NEW | Barangay Health dashboard layout |
+| `app/dashboard-barangay/page.tsx` | NEW | Barangay Health dashboard home |
+| `components/layout/barangay-health-dashboard-layout.tsx` | NEW | Barangay Health UI layout |
 | `RBAC_DESIGN.md` | NEW | System design document |
 
 ---

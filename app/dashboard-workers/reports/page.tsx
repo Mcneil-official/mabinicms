@@ -8,23 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { RefreshCcw } from "lucide-react";
 
 type NamedCount = { name: string; value: number };
@@ -42,14 +26,6 @@ type WorkerReportsPayload = {
   serviceMix: NamedCount[];
   monthlyTrend: TrendPoint[];
 };
-
-const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
 
 export default function ReportsPage() {
   const [data, setData] = useState<WorkerReportsPayload | null>(null);
@@ -96,6 +72,32 @@ export default function ReportsPage() {
     if (!data?.generatedAt) return "";
     return new Date(data.generatedAt).toLocaleString();
   }, [data?.generatedAt]);
+
+  const totalsBySummary = useMemo(() => {
+    return (data?.summary || []).reduce(
+      (acc, item) => ({ ...acc, [item.label]: item.value }),
+      {} as Record<string, number>,
+    );
+  }, [data?.summary]);
+
+  const reportNarrative = useMemo(() => {
+    if (!data) return "";
+
+    const totalActivities = totalsBySummary["Total Activities"] ?? 0;
+    const vaccinations = totalsBySummary["Vaccinations Logged"] ?? 0;
+    const maternal = totalsBySummary["Maternal Visits"] ?? 0;
+    const senior = totalsBySummary["Senior Assistance"] ?? 0;
+
+    return `This report covers ${totalActivities} recorded activities for ${data.barangay}. It includes ${vaccinations} vaccinations, ${maternal} maternal visits, and ${senior} senior assistance records.`;
+  }, [data, totalsBySummary]);
+
+  const sortedServiceMix = useMemo(() => {
+    return [...(data?.serviceMix || [])].sort((left, right) => right.value - left.value);
+  }, [data?.serviceMix]);
+
+  const recentTrend = useMemo(() => {
+    return [...(data?.monthlyTrend || [])].slice(-6);
+  }, [data?.monthlyTrend]);
 
   if (loading && !data) {
     return (
@@ -153,6 +155,18 @@ export default function ReportsPage() {
         </Card>
       ) : null}
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Report Summary</CardTitle>
+          <CardDescription>Text-based overview of the current worker report</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm leading-6 text-slate-700 dark:text-slate-300">
+            {reportNarrative || "No report summary is available yet."}
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {(data?.summary || []).map((item) => (
           <Card key={item.label}>
@@ -168,72 +182,57 @@ export default function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>6-Month Activity Trend</CardTitle>
-            <CardDescription>
-              Vaccination, maternal, and senior support records over time
-            </CardDescription>
+            <CardDescription>Month-by-month text summary of worker activity</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={data?.monthlyTrend || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="vaccinations"
-                  name="Vaccinations"
-                  stroke="var(--chart-1)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="maternal"
-                  name="Maternal"
-                  stroke="var(--chart-2)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="senior"
-                  name="Senior"
-                  stroke="var(--chart-3)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {recentTrend.length > 0 ? (
+                recentTrend.map((point) => (
+                  <div
+                    key={point.month}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold text-slate-900 dark:text-white">
+                        {point.month}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Vaccinations {point.vaccinations} · Maternal {point.maternal} · Senior {point.senior}
+                      </p>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                      This month logged {point.vaccinations} vaccinations, {point.maternal} maternal records, and {point.senior} senior support entries.
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">No trend data available.</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Vaccination Status</CardTitle>
-            <CardDescription>
-              Completed, pending, and overdue vaccinations logged by you
-            </CardDescription>
+            <CardDescription>Text list of logged vaccination outcomes</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={data?.vaccinationStatus || []}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={70}
-                  outerRadius={110}
-                  paddingAngle={2}
+            <div className="space-y-3">
+              {(data?.vaccinationStatus || []).map((item) => (
+                <div
+                  key={item.name}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 dark:border-slate-800"
                 >
-                  {(data?.vaccinationStatus || []).map((_, index) => (
-                    <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    {item.name}
+                  </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-300">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -241,38 +240,44 @@ export default function ReportsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Service Mix</CardTitle>
-          <CardDescription>
-            Most frequent service types from your current records
-          </CardDescription>
+          <CardDescription>Ranked text view of the most frequent services</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={data?.serviceMix || []} margin={{ left: 10, right: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tickLine={false} axisLine={false} angle={-20} textAnchor="end" height={72} />
-              <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-              <Tooltip />
-              <Bar dataKey="value" name="Records" fill="var(--chart-4)" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-3">
+            {sortedServiceMix.map((item, index) => (
+              <div
+                key={item.name}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 dark:border-slate-800"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    {item.name}
+                  </span>
+                </div>
+                <span className="text-sm text-slate-600 dark:text-slate-300">
+                  {item.value} records
+                </span>
+              </div>
+            ))}
+            {sortedServiceMix.length === 0 ? (
+              <p className="text-sm text-slate-500">No service mix data available.</p>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Analytics Ownership</CardTitle>
-          <CardDescription>
-            Per updated module scope
-          </CardDescription>
+          <CardDescription>Per updated module scope</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">Barangay Dashboard</Badge>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Advanced Analytics & Health Indicators are available at
-              /dashboard/health-indicators.
-            </p>
-          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Advanced Analytics & Health Indicators are available on the Barangay Health Dashboard.
+          </p>
         </CardContent>
       </Card>
     </div>

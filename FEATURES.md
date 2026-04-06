@@ -1,6 +1,6 @@
 # MabiniCare System Features
 
-This document explains all the features of MabiniCare. It is divided into two main sections based on who uses them: **Staff** and **Health Workers**.
+This document explains all the features of MabiniCare. It is divided into two main sections based on who uses them: **Barangay Health Staff** and **Health Workers**.
 
 ---
 
@@ -10,16 +10,38 @@ The system has two types of users:
 
 | User Type | Description |
 |-----------|-------------|
-| **Staff** | Office-based employees who manage the overall health system (admins, barangay admins) |
+| **Barangay Health Staff** | Office-based employees who manage the overall health system (admins, barangay health supervisors) |
 | **Health Workers** | Field-based employees who visit residents and record health data |
 
 Each user type has their own dashboard with different features.
 
 ---
 
-## Staff Features
+## Feature Categories
 
-Staff members log in at `/auth/login` and access the main dashboard.
+### Barangay Health Staff / Admin
+
+| Category | Includes |
+|----------|----------|
+| Dashboard | Overview metrics, YAKAP activity, recent activity |
+| Operations | Users, announcements, appointments & facilities |
+| Health Data | Health indicators, medications, barangay profiling |
+| Resources | Audit logs |
+
+### Health Workers
+
+| Category | Includes |
+|----------|----------|
+| Dashboard | Daily overview, assigned barangay, coverage snapshot |
+| Field Operations | Data entry, residents |
+| Monitoring | Reports, announcements, medication inventory |
+| Quick Access | QR scan in the header |
+
+---
+
+## Barangay Health Staff Features
+
+Barangay health staff members log in at `/auth/login` and access the main dashboard.
 
 ### 1. Main Dashboard
 - **What it does**: Shows a summary of all health activities
@@ -94,7 +116,7 @@ Staff members log in at `/auth/login` and access the main dashboard.
   - Track prenatal visits
   - Filter by barangay
 
-### 10. Staff Management (Admin Only)
+### 10. User Management (Admin Only)
 - **What it does**: Manages user accounts
 - **What you can do**:
   - Create new staff accounts
@@ -118,49 +140,31 @@ Staff members log in at `/auth/login` and access the main dashboard.
 Health workers log in at `/auth/workers` and access the worker dashboard.
 
 ### 1. Worker Dashboard
-- **What it does**: Shows a quick overview of the worker's assignments
+- **What it does**: Shows a quick overview of the worker's daily work
 - **What you see**:
   - Your assigned barangay
   - Number of residents you serve
   - Coverage statistics (vaccination, maternal, senior care)
-  - Map of health facilities in your area
   - Quick access to all features
 
-### 2. My Assignments
-- **What it does**: Shows your work summary
-- **What you see**:
-  - Total residents in your barangay
-  - Number of vaccinations given
-  - Maternal health records created
-  - Senior care records created
-  - Monthly activity summary
-
-### 3. Residents
+### 2. Residents
 - **What it does**: Shows all residents in your barangay
-- **What you can do**:
+- **What you see**:
   - View list of all residents
   - Search by name
   - Filter by purok (village area) or age group
   - See contact information
   - Check PhilHealth numbers
 
-### 4. Field Visits
-- **What it does**: Shows your past home visits
-- **What you see**:
-  - List of all recorded visits
-  - Type of visit (vaccination, maternal check, senior care)
-  - Date of each visit
-  - Status of each visit
-
-### 5. Reports
-- **What it does**: Shows your work statistics with charts
+### 3. Reports
+- **What it does**: Shows your work statistics in text-based summaries
 - **What you see**:
   - Summary numbers (total records, vaccinations, etc.)
-  - Vaccination status pie chart
-  - Service type breakdown
-  - Monthly trend line chart
+  - Text-based vaccination status list
+  - Ranked service type list
+  - Monthly trend text summaries
 
-### 6. Announcements
+### 4. Announcements
 - **What it does**: Create and manage announcements for workers
 - **What you can do**:
   - Create new announcements
@@ -169,7 +173,7 @@ Health workers log in at `/auth/workers` and access the worker dashboard.
   - Publish or save as draft
   - Edit or delete announcements
 
-### 7. Medication Inventory
+### 5. Medication Inventory
 - **What it does**: Shows medicines available in your barangay
 - **What you see**:
   - List of medicines allocated to your barangay
@@ -181,7 +185,7 @@ Health workers log in at `/auth/workers` and access the worker dashboard.
 
 ## Quick Comparison Table
 
-| Feature | Staff | Health Worker |
+| Feature | Barangay Health Staff | Health Worker |
 |---------|:-----:|:-------------:|
 | View dashboard summary | ✅ | ✅ |
 | Interactive health map | ✅ | ✅ |
@@ -195,12 +199,10 @@ Health workers log in at `/auth/workers` and access the worker dashboard.
 | Manage medications (all barangays) | ✅ | ❌ |
 | View medications (own barangay) | ❌ | ✅ |
 | Pregnancy profiling | ✅ | ❌ |
-| Staff management | ✅ (Admin) | ❌ |
+| User management | ✅ (Admin) | ❌ |
 | Barangay profiling | ✅ | ❌ |
 | View assigned residents | ❌ | ✅ |
-| Track field visits | ❌ | ✅ |
 | View work reports | ❌ | ✅ |
-| See assignment summary | ❌ | ✅ |
 
 ---
 
@@ -208,7 +210,7 @@ Health workers log in at `/auth/workers` and access the worker dashboard.
 
 | User Type | Login Page |
 |-----------|------------|
-| Staff / Admin | `/auth/login` |
+| Barangay Health Staff / Admin | `/auth/login` |
 | Health Worker | `/auth/workers` |
 
 ---

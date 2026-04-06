@@ -1,7 +1,7 @@
 # RBAC System Design - MabiniCare
 
 ## Overview
-This document outlines the comprehensive Role-Based Access Control (RBAC) system for MabiniCare supporting three distinct user roles: Work Health, Barangay Health, and Admin.
+This document outlines the comprehensive Role-Based Access Control (RBAC) system for MabiniCare supporting three distinct user roles: Health Workers, Barangay Health Staff, and Admin.
 
 ---
 
@@ -11,7 +11,7 @@ This document outlines the comprehensive Role-Based Access Control (RBAC) system
 | Role ID | User Type | Database Role | Key Responsibilities |
 |---------|-----------|---------------|----------------------|
 | `WORK_HEALTH` | Health Workers | `workers` | Service delivery, record submission, vaccination tracking |
-| `BARANGAY_HEALTH` | CHO/Health Officers | `barangay_admin` | Oversee workers, approve submissions, monitor indicators |
+| `BARANGAY_HEALTH` | Barangay Health Staff | `staff` | Oversee workers, manage barangay data, monitor indicators |
 | `ADMIN` | System Admin | `admin` | System configuration, user management, data audits |
 
 ### Role Hierarchy
@@ -42,7 +42,7 @@ WORK_HEALTH (Field Workers)
 |---------|-------|-----------------|-------------|
 | Admin Dashboard | ✅ | ❌ | ❌ |
 | Barangay Health Dashboard | ❌ | ✅ | ❌ |
-| Work Health Dashboard | ❌ | ✅ (view-only) | ✅ |
+| Work Health Dashboard | ❌ | ❌ | ✅ |
 | Analytics | ✅ | ✅ | ❌ |
 | Reporting | ✅ | ✅ | ❌ |
 
@@ -79,11 +79,10 @@ WORK_HEALTH (Field Workers)
 #### Admin Only
 - `/dashboard-admin/*` - Admin console
 - `/api/admin/*` - Admin APIs
-- `/dashboard/staff-management` - User management
-- `/dashboard/system-settings` - System config
+- `/dashboard/staff` - User management (admin only)
 
 #### Barangay Health Only
-- `/dashboard-barangay/*.tsx` - Barangay Health dashboard
+- `/dashboard/*` - Barangay Health dashboard routes
 - `/api/barangay-health/*` - Barangay Health APIs
 
 #### Work Health Only
@@ -91,8 +90,8 @@ WORK_HEALTH (Field Workers)
 - `/api/health-workers/*` - Worker APIs
 
 #### Multi-Role (Role-based filtering)
-- `/dashboard/barangay-profiling` - Admin/Barangay Health (CHO can see all; workers see assigned)
-- `/dashboard/health-indicators` - Admin/Barangay Health
+- `/dashboard/barangay-profiling` - Admin/Barangay Health (staff can see assigned scope)
+- `/dashboard/health-indicators` - Admin/Barangay Health (merged into dashboard for staff)
 - `/dashboard/announcements` - All authenticated (role-based visibility)
 
 ---
@@ -104,7 +103,7 @@ WORK_HEALTH (Field Workers)
 -- Check for Barangay Health role accessing own barangay
 WHERE
   (current_user_role = 'admin') 
-  OR (current_user_role = 'barangay_admin' AND resident_barangay = current_assigned_barangay)
+  OR (current_user_role = 'staff' AND resident_barangay = current_assigned_barangay)
   OR (current_user_role = 'workers' AND resident_barangay = current_assigned_barangay)
 ```
 
@@ -131,7 +130,7 @@ WHERE
    - Sets httpOnly cookie (7-day expiry)
 5. Redirect based on role:
    - admin → /dashboard (Admin Dashboard)
-   - barangay_admin → /dashboard-barangay (Barangay Health Dashboard)
+  - staff → /dashboard (Barangay Health Dashboard)
    - workers → /dashboard-workers (Work Health Dashboard)
 ```
 
@@ -141,7 +140,7 @@ WHERE
   user: {
     id: string;
     username: string;
-    role: "admin" | "barangay_admin" | "workers";
+    role: "admin" | "staff" | "workers";
     assigned_barangay: string;
   };
   expires: string; // ISO date (7 days from login)

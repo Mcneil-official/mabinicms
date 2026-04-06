@@ -4,7 +4,7 @@ A comprehensive, GIS-enabled community health information system built with Next
 
 ## Features
 
-- **Staff Management** - Create/Edit/Delete BHW users
+- **User Management** - Create/Edit/Delete user accounts
 - **Facilities** - Manage health centers and schedules
 - **Submissions** - Process health concerns
 - **YAKAP** - Handle PhilHealth Konsulta applications
@@ -66,11 +66,11 @@ Open [http://localhost:3000](http://localhost:3000)
 
 | Table                    | Description            |
 | ------------------------ | ---------------------- |
-| `users`                  | BHW staff management   |
+| `users`                  | User accounts          |
 | `residents`              | Resident registry      |
 | `health_facilities`      | Health center info     |
 | `facility_schedules`     | Service schedules      |
-| `personnel_availability` | BHW staff availability |
+| `personnel_availability` | Personnel availability |
 | `submissions`            | Health concerns        |
 | `yakap_applications`     | Insurance applications |
 | `activity_logs`          | Audit trail            |
@@ -88,7 +88,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ```
 app/
   dashboard/
-    staff/             # Staff management
+    staff/             # User management (admin only)
     facilities/        # Health facilities
     submissions/       # Health concerns
     yakap/             # YAKAP applications
@@ -125,11 +125,11 @@ migrations/            # Database migrations
 
 ## Services
 
-### Staff Management
+### User Management
 
-- Create/Edit/Delete BHW users
+- Create/Edit/Delete user accounts
 - Filter by role/barangay
-- View staff list
+- View user list
 
 ### Facilities Management
 

@@ -10,8 +10,39 @@ import { initPWA } from "@/lib/utils/pwa-utils";
  */
 export function PWAInitializer() {
   useEffect(() => {
-    // Initialize PWA on mount
-    initPWA();
+    let cancelled = false;
+
+    const startPWA = () => {
+      if (!cancelled) {
+        void initPWA();
+      }
+    };
+
+    if (typeof window === "undefined") {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if ("requestIdleCallback" in window) {
+      const idleWindow = window as Window & {
+        requestIdleCallback: typeof window.requestIdleCallback;
+        cancelIdleCallback: typeof window.cancelIdleCallback;
+      };
+      const idleId = idleWindow.requestIdleCallback(startPWA, { timeout: 2000 });
+
+      return () => {
+        cancelled = true;
+        idleWindow.cancelIdleCallback(idleId);
+      };
+    }
+
+    const timeoutId = globalThis.setTimeout(startPWA, 1000);
+
+    return () => {
+      cancelled = true;
+      globalThis.clearTimeout(timeoutId);
+    };
   }, []);
 
   return null; // This component doesn't render anything
