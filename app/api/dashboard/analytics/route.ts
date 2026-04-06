@@ -48,7 +48,7 @@ type BarangayProfileAnalyticsRow = {
 };
 
 function canViewDashboardAnalytics(role: string) {
-  return role === "admin" || role === "barangay_admin" || role === "staff";
+  return role === "admin" || role === "staff";
 }
 
 function bucketMonth(dateInput: string | null | undefined) {

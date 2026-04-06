@@ -9,8 +9,8 @@ import { ArrowLeft } from "lucide-react";
  * Login page for internal staff
  * Redirects to dashboard if already authenticated
  */
-export default async function LoginPage() {
-  // If already logged in, redirect to dashboard
+export default async function StaffLoginPage() {
+  // If already logged in, redirect to the correct dashboard per role
   const session = await getSession();
   if (session) {
     const role = (session.user.role || "").trim().toLowerCase();
@@ -19,11 +19,14 @@ export default async function LoginPage() {
       redirect("/dashboard-workers");
     }
 
-    if (role === "barangay_admin") {
-      redirect("/dashboard-barangay");
+    if (role === "admin") {
+      redirect("/dashboard-admin");
     }
 
-    redirect("/dashboard");
+    // Staff should use the original staff dashboard experience.
+    if (role === "staff") {
+      redirect("/dashboard");
+    }
   }
 
   return (

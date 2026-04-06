@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getYakakApplications } from "@/lib/queries/yakap";
 import { format } from "date-fns";
@@ -85,6 +86,7 @@ const StatCard = ({ title, value, icon, color }: StatCard) => (
 );
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [recentApplications, setRecentApplications] = useState<
     YakakApplication[]
@@ -105,6 +107,12 @@ export default function DashboardPage() {
       const session = await getSession();
       if (!session) {
         setIsLoading(false);
+        return;
+      }
+
+      // Admin users have a dedicated dashboard surface.
+      if ((session.user.role || "").trim().toLowerCase() === "admin") {
+        router.replace("/dashboard-admin");
         return;
       }
 
@@ -159,7 +167,7 @@ export default function DashboardPage() {
       console.error("[fetchRecentApplications]", error);
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     fetchRecentApplications();

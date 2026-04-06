@@ -55,7 +55,7 @@ export async function adminLoginAction(formData: {
     };
 
     await setSession(session);
-    redirect("/dashboard");
+    redirect("/dashboard-admin");
   } catch (error) {
     console.error("[adminLoginAction]", error);
     return { success: false, error: "An error occurred. Please try again." };

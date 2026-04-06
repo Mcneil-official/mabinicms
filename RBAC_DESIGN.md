@@ -77,7 +77,7 @@ WORK_HEALTH (Field Workers)
 ### Protected Routes
 
 #### Admin Only
-- `/dashboard/admin/*` - Admin console
+- `/dashboard-admin/*` - Admin console
 - `/api/admin/*` - Admin APIs
 - `/dashboard/staff-management` - User management
 - `/dashboard/system-settings` - System config

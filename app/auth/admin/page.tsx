@@ -10,19 +10,10 @@ import { ArrowLeft } from "lucide-react";
  * Redirects to the proper dashboard if already authenticated
  */
 export default async function AdminLoginPage() {
+  // If already logged in as admin, redirect to admin dashboard
   const session = await getSession();
-  if (session) {
-    const role = (session.user.role || "").trim().toLowerCase();
-
-    if (role === "workers") {
-      redirect("/dashboard-workers");
-    }
-
-    if (role === "barangay_admin") {
-      redirect("/dashboard-barangay");
-    }
-
-    redirect("/dashboard");
+  if (session && session.user.role === "admin") {
+    redirect("/dashboard-admin");
   }
 
   return (
@@ -55,19 +46,6 @@ export default async function AdminLoginPage() {
           <p className="font-medium">Admin Access</p>
           <p className="mt-1 text-xs">Contact your administrator for access</p>
         </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Are you staff or a City Health Worker?{" "}
-            <Link
-              href="/auth/login"
-              className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Go to Staff Login
-            </Link>
-          </p>
-        </div>
-
       </div>
     </div>
   );

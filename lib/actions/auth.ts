@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient, setSession } from "@/lib/auth";
 import { loginSchema } from "@/lib/schemas/auth";
-import type { User, Session } from "@/lib/types";
+import type { Session } from "@/lib/types";
 import bcrypt from "bcryptjs";
 
 /**
@@ -79,12 +79,18 @@ export async function loginAction(formData: {
       redirect("/dashboard-workers");
     }
 
-    if (role === "barangay_admin") {
+    if (role === "staff") {
       redirect("/dashboard-barangay");
     }
 
-    // admin + staff default
-    redirect("/dashboard");
+    if (role === "admin") {
+      redirect("/dashboard-admin");
+    }
+
+    return {
+      success: false,
+      error: "Account role is not allowed to access this portal.",
+    };
   } catch (error) {
     console.error("[loginAction]", error);
     return { success: false, error: "An error occurred. Please try again." };

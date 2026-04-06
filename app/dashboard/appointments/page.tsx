@@ -65,7 +65,6 @@ export default function AppointmentsPage() {
   };
 
   const isStaff =
-    state.session?.user?.role === "barangay_admin" ||
     state.session?.user?.role === "admin" ||
     state.session?.user?.role === "staff";
 

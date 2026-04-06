@@ -135,7 +135,7 @@ export default function YakakPage() {
   };
 
   const isStaff =
-    state.session?.user?.role === "barangay_admin" ||
+    state.session?.user?.role === "staff" ||
     state.session?.user?.role === "admin";
 
   return (
