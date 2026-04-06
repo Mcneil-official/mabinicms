@@ -21,7 +21,7 @@ A comprehensive role-based access control (RBAC) system has been successfully de
 │  ├─ User management                                         │
 │  └─ System configuration                                    │
 │                                                              │
-│  Level 2: BARANGAY_HEALTH (CHO - Community Health Officer)  │
+│  Level 2: STAFF (Barangay Health Staff)                     │
 │  ├─ Own barangay data only                                  │
 │  ├─ Oversee health workers                                  │
 │  ├─ Monitor health indicators                               │
@@ -46,7 +46,7 @@ A comprehensive role-based access control (RBAC) system has been successfully de
      │
      ├─→ Parse credentials
      ├─→ Validate bcrypt password
-     ├─→ Convert role to RoleType (admin/barangay_admin/workers)
+    ├─→ Convert role to RoleType (admin/staff/workers)
      ├─→ Create 7-day session cookie
      │
      ▼
@@ -120,12 +120,12 @@ middleware.ts                      (Route protection)
 
 #### 4. Barangay Health Dashboard
 ```
-app/dashboard-barangay/
+app/dashboard/
 ├── layout.tsx                    (Role-specific layout)
 └── page.tsx                      (Dashboard home)
 
 components/layout/
-└── barangay-health-dashboard-layout.tsx  (UI layout for CHO)
+└── barangay-health-dashboard-layout.tsx  (UI layout for staff)
 ```
 
 #### 5. Documentation
@@ -165,12 +165,24 @@ components/layout/
 - Full audit logs
 - All barangay data
 
-**Barangay Health Dashboard** (`/dashboard-barangay`)
+**Admin / Staff Menu Categories**
+- Dashboard: overview metrics and summaries
+- Operations: users and announcements
+- Health Data: facilities, medications, barangay profiling
+- Resources: audit logs
+
+**Barangay Health Dashboard** (`/dashboard`)
 - Worker oversights
 - Resident management
 - Pregnancy monitoring
 - Health indicators
 - Barangay-specific analytics
+
+**Health Worker Menu Categories**
+- Dashboard: daily overview
+- Field Operations: data entry and residents
+- Monitoring: reports, announcements, medication inventory
+- Quick Access: QR scan in the header
 
 **Health Worker Dashboard** (`/dashboard-workers`)
 - Case assignments
@@ -332,9 +344,9 @@ export default async function AdminLayout({ children }) {
 ### Dashboards (3 files)
 | File | Purpose | Size |
 |------|---------|------|
-| `app/dashboard-barangay/layout.tsx` | CHO dashboard layout | ~20 lines |
-| `app/dashboard-barangay/page.tsx` | CHO home page | ~200 lines |
-| `components/layout/barangay-health-dashboard-layout.tsx` | CHO UI | ~350 lines |
+| `app/dashboard/layout.tsx` | Staff dashboard layout | ~20 lines |
+| `app/dashboard/page.tsx` | Staff home page | ~200 lines |
+| `components/layout/barangay-health-dashboard-layout.tsx` | Staff UI | ~350 lines |
 
 ### Utilities (3 files)
 | File | Purpose | Size |
@@ -366,7 +378,7 @@ export default async function AdminLayout({ children }) {
 ]
 ```
 
-### Barangay Health Officer
+### Barangay Health Staff
 ```javascript
 [
   'view_barangay_dashboard',
@@ -457,7 +469,7 @@ Monitoring
 
 **RBAC System v1.0**
 - Release Date: 2026-03-21
-- Roles: 3 (Admin, Barangay Health, Work Health)
+- Roles: 3 (Admin, Staff, Workers)
 - Permissions: 25+
 - Files: 19 new/created
 

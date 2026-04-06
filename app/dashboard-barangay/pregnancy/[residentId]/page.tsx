@@ -6,7 +6,7 @@ interface Props {
 
 export default async function PregnancyProfilePageRedirect({ params }: Props) {
   await params;
-  redirect("/dashboard/barangay-profiling");
+  redirect("/dashboard-barangay/barangay-profiling");
 }
 
 export async function generateMetadata() {

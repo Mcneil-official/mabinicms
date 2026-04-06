@@ -106,13 +106,10 @@ export const PERMISSION_MATRIX: Record<RoleType, Set<Permission>> = {
     // Not: MANAGE_USERS, ASSIGN_ROLES
 
     // Feature Access
-    Permission.ACCESS_YAKAP,
     Permission.ACCESS_VACCINES,
     Permission.ACCESS_MATERNAL_HEALTH,
     Permission.ACCESS_BARANGAY_PROFILING,
-    Permission.ACCESS_HEALTH_FACILITIES,
     Permission.ACCESS_ANNOUNCEMENTS,
-    Permission.ACCESS_APPOINTMENTS,
     Permission.ACCESS_MEDICATIONS,
 
     // Record-specific
@@ -241,9 +238,9 @@ export function isFieldWorkerRole(role: RoleType): boolean {
  */
 export function getDashboardRoutes(role: RoleType): string[] {
   const routes: Record<RoleType, string[]> = {
-    [RoleType.ADMIN]: ["/dashboard-admin", "/dashboard", "/dashboard-workers"],
-    [RoleType.BARANGAY_HEALTH]: ["/dashboard-barangay", "/dashboard-workers", "/dashboard"],
-    [RoleType.WORK_HEALTH]: ["/dashboard-workers", "/dashboard"],
+    [RoleType.ADMIN]: ["/dashboard-admin"],
+    [RoleType.BARANGAY_HEALTH]: ["/dashboard-barangay"],
+    [RoleType.WORK_HEALTH]: ["/dashboard-workers"],
   };
   return routes[role];
 }

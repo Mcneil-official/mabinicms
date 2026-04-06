@@ -16,17 +16,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Home,
   Users,
-  ClipboardList,
-  MapPin,
   FileText,
   Bell,
   Pill,
   Menu,
   X,
+  ChevronDown,
   LogOut,
   Stethoscope,
   QrCode,
 } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 import { workerLogoutAction } from "@/lib/actions/worker-auth";
 import type { User as UserType } from "@/lib/types";
 
@@ -35,46 +35,62 @@ interface WorkerDashboardLayoutProps {
   user: UserType;
 }
 
-const navigation = [
+type NavItem = {
+  name: string;
+  href: string;
+  icon: typeof Home;
+};
+
+type NavSection = {
+  title: string;
+  items: NavItem[];
+};
+
+const navigation: NavSection[] = [
   {
-    name: "Dashboard",
-    href: "/dashboard-workers",
-    icon: Home,
+    title: "Dashboard",
+    items: [
+      {
+        name: "Dashboard",
+        href: "/dashboard-workers",
+        icon: Home,
+      },
+    ],
   },
   {
-    name: "Data Entry",
-    href: "/dashboard-workers/data-entry",
-    icon: Stethoscope,
+    title: "Field Operations",
+    items: [
+      {
+        name: "Data Entry",
+        href: "/dashboard-workers/data-entry",
+        icon: Stethoscope,
+      },
+      {
+        name: "Residents",
+        href: "/dashboard-workers/residents",
+        icon: Users,
+      },
+    ],
   },
   {
-    name: "My Assignments",
-    href: "/dashboard-workers/assignments",
-    icon: ClipboardList,
-  },
-  {
-    name: "Residents",
-    href: "/dashboard-workers/residents",
-    icon: Users,
-  },
-  {
-    name: "Field Visits",
-    href: "/dashboard-workers/visits",
-    icon: MapPin,
-  },
-  {
-    name: "Reports",
-    href: "/dashboard-workers/reports",
-    icon: FileText,
-  },
-  {
-    name: "Announcements",
-    href: "/dashboard-workers/announcements",
-    icon: Bell,
-  },
-  {
-    name: "Medication Inventory",
-    href: "/dashboard-workers/medications",
-    icon: Pill,
+    title: "Monitoring",
+    items: [
+      {
+        name: "Reports",
+        href: "/dashboard-workers/reports",
+        icon: FileText,
+      },
+      {
+        name: "Announcements",
+        href: "/dashboard-workers/announcements",
+        icon: Bell,
+      },
+      {
+        name: "Medication Inventory",
+        href: "/dashboard-workers/medications",
+        icon: Pill,
+      },
+    ],
   },
 ];
 
@@ -84,6 +100,20 @@ export function WorkerDashboardLayout({
 }: WorkerDashboardLayoutProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDesktopSections, setOpenDesktopSections] = useState<Record<string, boolean>>(
+    () =>
+      navigation.reduce((acc, section) => {
+        acc[section.title] = true;
+        return acc;
+      }, {} as Record<string, boolean>),
+  );
+  const [openMobileSections, setOpenMobileSections] = useState<Record<string, boolean>>(
+    () =>
+      navigation.reduce((acc, section) => {
+        acc[section.title] = true;
+        return acc;
+      }, {} as Record<string, boolean>),
+  );
 
   const handleLogout = async () => {
     await workerLogoutAction();
@@ -91,6 +121,20 @@ export function WorkerDashboardLayout({
 
   const getUserInitials = (username: string) => {
     return username.substring(0, 2).toUpperCase();
+  };
+
+  const toggleDesktopSection = (title: string) => {
+    setOpenDesktopSections((current) => ({
+      ...current,
+      [title]: !current[title],
+    }));
+  };
+
+  const toggleMobileSection = (title: string) => {
+    setOpenMobileSections((current) => ({
+      ...current,
+      [title]: !current[title],
+    }));
   };
 
   return (
@@ -107,29 +151,55 @@ export function WorkerDashboardLayout({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
-                    ${
-                      isActive
-                        ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
-                        : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-                    }
-                  `}
+          <nav className="flex-1 space-y-5 p-4">
+            {navigation.map((section) => (
+              <div key={section.title} className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => toggleDesktopSection(section.title)}
+                  className="flex w-full items-center justify-between px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  aria-expanded={openDesktopSections[section.title]}
+                  aria-label={`Toggle ${section.title}`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {item.name}
-                </Link>
-              );
-            })}
+                  <span>{section.title}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 transition-transform duration-200",
+                      openDesktopSections[section.title] ? "rotate-0" : "-rotate-90",
+                    )}
+                  />
+                </button>
+                <div
+                  className={cn(
+                    "space-y-1 overflow-hidden transition-all duration-200",
+                    openDesktopSections[section.title] ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+                  )}
+                >
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`
+                          flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                          ${
+                            isActive
+                              ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
+                              : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                          }
+                        `}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Worker Info */}
@@ -254,30 +324,56 @@ export function WorkerDashboardLayout({
               </div>
 
               {/* Navigation */}
-              <nav className="flex-1 space-y-1 p-4">
-                {navigation.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`
-                        flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
-                        ${
-                          isActive
-                            ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
-                            : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-                        }
-                      `}
+              <nav className="flex-1 space-y-5 p-4">
+                {navigation.map((section) => (
+                  <div key={section.title} className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleMobileSection(section.title)}
+                      className="flex w-full items-center justify-between px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                      aria-expanded={openMobileSections[section.title]}
+                      aria-label={`Toggle ${section.title}`}
                     >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+                      <span>{section.title}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform duration-200",
+                          openMobileSections[section.title] ? "rotate-0" : "-rotate-90",
+                        )}
+                      />
+                    </button>
+                    <div
+                      className={cn(
+                        "space-y-1 overflow-hidden transition-all duration-200",
+                        openMobileSections[section.title] ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+                      )}
+                    >
+                      {section.items.map((item) => {
+                        const isActive = pathname === item.href;
+                        const Icon = item.icon;
+
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`
+                              flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                              ${
+                                isActive
+                                  ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
+                                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                              }
+                            `}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {item.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </nav>
 
               {/* Worker Info */}

@@ -21,8 +21,8 @@
          ▼
 ┌─────────────────────────────────────┐
 │  Role-Specific Dashboard Routing    │
-│  admin → /dashboard                 │
-│  barangay_admin → /dashboard-barangay
+│  admin → /dashboard-admin           │
+│  staff → /dashboard                 │
 │  workers → /dashboard-workers       │
 └────────┬────────────────────────────┘
          │
@@ -165,10 +165,10 @@ CONTINUE   Return 403
 Example Query:
 WHERE 
   (user_role = 'admin')                    // Admin = all data
-  OR (user_role = 'barangay_admin' AND 
-      barangay = 'user_assigned_barangay') // CHO = own barangay
+  OR (user_role = 'staff' AND 
+    barangay = 'user_assigned_barangay') // Staff = own barangay
   OR (user_role = 'workers' AND 
-      barangay = 'user_assigned_barangay') // Worker = own barangay
+    barangay = 'user_assigned_barangay') // Worker = own barangay
 ```
 
 ## 5. File Dependencies
@@ -197,8 +197,8 @@ RBAC Core        API Authorization
                  │
                  ▼
            Dashboards & Pages
-           ├─ /dashboard (Admin)
-           ├─ /dashboard-barangay (CHO)
+           ├─ /dashboard-admin (Admin)
+           ├─ /dashboard (Staff)
            └─ /dashboard-workers (Worker)
                  │
                  ▼
@@ -258,16 +258,16 @@ Feature Access                  │       │          │
 │  ├─ id, name, barangay, ...     │
 │  ├─ RLS Policy:                 │
 │  │  user_role ='admin' → *      │
-│  │  user_role = 'cho' AND       │
+│  │  user_role = 'staff' AND     │
 │  │    barangay = user_barangay  │
-│  │  user_role = 'worker' AND    │
+│  │  user_role = 'workers' AND   │
 │  │    barangay = user_barangay  │
 │  └─ user_created_by = user_id   │
 └─────────────────────────────────┘
          │
          ├─→ Admin sees: [Barangay1, Barangay2, Barangay3, ...] ✅ All
          │
-         ├─→ CHO (Barangay1) sees: [Barangay1] ✅ Own only
+     ├─→ Staff (Barangay1) sees: [Barangay1] ✅ Own only
          │
          └─→ Worker (Barangay1) sees: [Barangay1] ✅ Own barangay records
              (limited to assigned cases)
@@ -276,7 +276,7 @@ Feature Access                  │       │          │
 ## 8. Request Flow Example
 
 ```
-User clicks "View Residents" in CHO Dashboard
+User clicks "View Residents" in Staff Dashboard
          │
          ▼
 ┌────────────────────────────┐

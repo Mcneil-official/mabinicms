@@ -5,10 +5,11 @@ import {
   getMedicationBarangays,
   getMedicationInventoryForBarangay,
   getMedicationInventoryForCho,
+  performMedicationDistribution,
 } from "@/lib/queries/medications";
 
 function canManage(role: string) {
-  return role === "workers";
+  return role === "workers" || role === "staff";
 }
 
 export async function GET() {
@@ -19,7 +20,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role === "workers") {
+    const normalizedRole = (session.user.role || "").trim().toLowerCase();
+
+    if (normalizedRole === "workers") {
       const [data, barangays] = await Promise.all([
         getMedicationInventoryForCho(),
         getMedicationBarangays(),
@@ -27,6 +30,7 @@ export async function GET() {
 
       return NextResponse.json({
         mode: "cho",
+        can_manage: true,
         barangays,
         ...data,
       });
@@ -45,6 +49,7 @@ export async function GET() {
 
     return NextResponse.json({
       mode: "worker",
+      can_manage: normalizedRole === "staff",
       barangay: assignedBarangay,
       ...data,
     });
@@ -65,7 +70,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!canManage(session.user.role)) {
+    const normalizedRole = (session.user.role || "").trim().toLowerCase();
+
+    if (!canManage(normalizedRole)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -113,6 +120,30 @@ export async function POST(request: NextRequest) {
       },
       session.user.id,
     );
+
+    if (normalizedRole === "staff") {
+      const assignedBarangay = session.user.assigned_barangay?.trim();
+
+      if (!assignedBarangay) {
+        return NextResponse.json(
+          { error: "No assigned barangay found for this user." },
+          { status: 400 },
+        );
+      }
+
+      if (quantity > 0) {
+        await performMedicationDistribution(
+          {
+            actionType: "allocate",
+            medicationId: id,
+            quantity,
+            barangay: assignedBarangay,
+            notes: "Initial stock allocation for barangay staff medication entry.",
+          },
+          session.user.id,
+        );
+      }
+    }
 
     return NextResponse.json({ id }, { status: 201 });
   } catch (error) {

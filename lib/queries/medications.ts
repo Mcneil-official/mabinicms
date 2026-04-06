@@ -524,6 +524,32 @@ export async function updateMedicationInventory(
   });
 }
 
+export async function deleteMedicationInventory(id: string, actorId: string) {
+  const supabase = await createServerSupabaseClient();
+
+  const { data: existing, error: existingError } = await supabase
+    .from("medication_inventory")
+    .select("id, medicine_name, category, batch_number")
+    .eq("id", id)
+    .single();
+
+  if (existingError) throw existingError;
+
+  const { error } = await supabase
+    .from("medication_inventory")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+
+  await logMedicationAction(null, "delete_medication", actorId, {
+    medication_id: id,
+    medicine_name: existing.medicine_name,
+    category: existing.category,
+    batch_number: existing.batch_number,
+  });
+}
+
 async function upsertAllocation(
   medicationId: string,
   barangay: string,
