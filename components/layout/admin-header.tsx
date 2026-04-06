@@ -1,7 +1,9 @@
 "use client";
 
-import { LogoutButton } from "@/components/auth/logout-button";
+import { adminLogoutAction } from "@/lib/actions/admin-auth";
 import { SidebarToggle } from "@/components/layout/sidebar";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import type { User } from "@/lib/types";
 
 interface AdminHeaderProps {
@@ -32,7 +34,17 @@ export function AdminHeader({
             </p>
             <p className="text-xs text-rose-700 dark:text-rose-300">Administrator</p>
           </div>
-          <LogoutButton />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              await adminLogoutAction();
+            }}
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </div>
     </header>
