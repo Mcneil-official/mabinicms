@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -147,16 +148,25 @@ export function Sidebar({ user, isOpen = true, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white transition-transform duration-200 dark:border-slate-800 dark:bg-slate-950",
+        "fixed left-0 top-0 z-40 h-screen w-64 border-r border-blue-200/80 bg-white transition-transform duration-200 dark:border-blue-900/40 dark:bg-slate-950",
         !isOpen && "-translate-x-full md:translate-x-0",
       )}
     >
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="border-b border-slate-200 px-6 py-6 dark:border-slate-800">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Health System
-          </h2>
+        <div className="border-b border-blue-200/80 px-6 py-6 dark:border-blue-900/40">
+          <div className="mb-2 flex items-center gap-3">
+            <Image
+              src="/mabini-logo.png"
+              alt="MabiniCare official logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full border border-blue-200 bg-white object-cover"
+            />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              MabiniCare
+            </h2>
+          </div>
           <p className="text-xs text-slate-600 dark:text-slate-400">
             {user.assigned_barangay}
           </p>
@@ -198,7 +208,7 @@ export function Sidebar({ user, isOpen = true, onClose }: SidebarProps) {
         </nav>
 
         {/* User Info */}
-        <div className="border-t border-slate-200 px-6 py-4 dark:border-slate-800">
+        <div className="border-t border-blue-200/80 px-6 py-4 dark:border-blue-900/40">
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             SIGNED IN AS
           </p>

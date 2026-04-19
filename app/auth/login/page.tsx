@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -28,7 +29,7 @@ export default async function StaffLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4 dark:from-slate-950 dark:to-slate-900">
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       <div className="w-full max-w-md">
         <div className="mb-3 flex justify-start">
           <Button
@@ -45,16 +46,16 @@ export default async function StaffLoginPage() {
 
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-            Health System
+            MabiniCare
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
             Barangay Management Dashboard
           </p>
         </div>
 
         <LoginForm />
 
-        <div className="mt-6 rounded-lg bg-blue-50 p-4 text-sm text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
           <p className="font-medium">Demo Credentials (Testing)</p>
           <p className="mt-1 text-xs">Contact your administrator for access</p>
         </div>

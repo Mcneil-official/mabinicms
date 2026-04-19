@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
 import { workerLoginAction } from "@/lib/actions/worker-auth";
-import { AlertCircle, Eye, EyeOff, Loader2, Users } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export function WorkerLoginForm() {
   const [isPending, setIsPending] = useState(false);
@@ -61,13 +62,12 @@ export function WorkerLoginForm() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-blue-200/70 bg-white/95 shadow-sm dark:border-blue-900/50 dark:bg-slate-950/95">
       <CardHeader className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+        <div className="flex items-center justify-center gap-2">
           <CardTitle className="text-2xl">City Health Login</CardTitle>
         </div>
-        <CardDescription>
+        <CardDescription className="text-center">
           Enter your worker credentials to continue
         </CardDescription>
       </CardHeader>

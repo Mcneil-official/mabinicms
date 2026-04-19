@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Building2, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { ShieldCheck } from "lucide-react";
 
 const chips = [
   "Resident-Centered Care",
@@ -15,29 +16,34 @@ const aboutParagraphs = [
 
 export default function Page() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <main className="relative min-h-screen overflow-hidden bg-slate-100 text-slate-900">
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(37,99,235,0.075) 1px, transparent 1px), linear-gradient(to bottom, rgba(37,99,235,0.075) 1px, transparent 1px)",
           backgroundSize: "36px 36px",
         }}
       />
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-emerald-300/25 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-teal-200/30 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-blue-300/20 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-indigo-200/30 blur-3xl" />
       </div>
 
       <section className="relative mx-auto w-full max-w-7xl px-6 pb-12 pt-8 sm:px-10 lg:px-16">
-        <header className="mb-10 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+        <header className="mb-10 rounded-2xl border border-blue-200/70 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-700 text-white">
-                <Building2 className="h-5 w-5" />
-              </span>
+              <Image
+                src="/mabini-logo.png"
+                alt="MabiniCare official logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full border border-blue-200 bg-white object-cover"
+                priority
+              />
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700/80">
                   MUNICIPAL HEALTH PLATFORM
                 </p>
                 <h1 className="text-xl font-bold leading-tight">MabiniCare</h1>
@@ -47,19 +53,19 @@ export default function Page() {
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href="/auth/login"
-                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
               >
                 Barangay Staff Login
               </Link>
               <Link
                 href="/auth/workers"
-                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
               >
                 City Worker Login
               </Link>
               <Link
                 href="/auth/admin"
-                className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-800"
+                className="rounded-full bg-blue-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-800"
               >
                 Admin Login
               </Link>
@@ -68,7 +74,7 @@ export default function Page() {
         </header>
 
         <section className="mb-10">
-          <p className="mb-4 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+          <p className="mb-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
             OFFICIAL ACCESS PAGE
           </p>
 
@@ -92,7 +98,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur sm:p-8">
+        <section className="rounded-3xl border border-blue-200/70 bg-white/95 p-6 shadow-sm backdrop-blur sm:p-8">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -109,8 +115,8 @@ export default function Page() {
               </div>
             </div>
 
-            <aside className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-6">
-              <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <aside className="rounded-3xl border border-blue-200/80 bg-blue-50/60 p-6">
+              <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
                 <ShieldCheck className="h-4 w-4" />
                 BUILT FOR PUBLIC SERVICE
               </p>
@@ -137,7 +143,7 @@ export default function Page() {
           </div>
         </section>
 
-        <footer className="mt-6 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-600">
+        <footer className="mt-6 rounded-xl border border-blue-200/70 bg-white/90 px-4 py-3 text-sm text-slate-600">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p>MabiniCare | Barangay Health Operations</p>
             <p className="font-medium text-slate-700">Version 1.0</p>
