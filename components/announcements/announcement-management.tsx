@@ -67,6 +67,9 @@ export function AnnouncementManagement() {
   const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [listSearch, setListSearch] = useState("");
+  const [listStatus, setListStatus] = useState<"all" | AnnouncementStatus>("all");
+  const [listBarangay, setListBarangay] = useState("");
 
   const isEditing = Boolean(editingId);
 
@@ -190,6 +193,38 @@ export function AnnouncementManagement() {
   const filteredBarangays = availableBarangays.filter((barangay) =>
     barangay.toLowerCase().includes(barangaySearch.toLowerCase()),
   );
+
+  const filteredAnnouncements = announcements.filter((item) => {
+    if (listStatus !== "all" && item.status !== listStatus) {
+      return false;
+    }
+
+    if (
+      listSearch &&
+      !`${item.title} ${item.content}`
+        .toLowerCase()
+        .includes(listSearch.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (
+      listBarangay &&
+      !item.target_barangays.some(
+        (entry) => normalizeBarangayName(entry) === normalizeBarangayName(listBarangay),
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const announcementSummary = {
+    total: announcements.length,
+    drafts: announcements.filter((item) => item.status === "draft").length,
+    published: announcements.filter((item) => item.status === "published").length,
+  };
 
   const handleEdit = (item: AnnouncementItem) => {
     setEditingId(item.id);
@@ -315,6 +350,45 @@ export function AnnouncementManagement() {
       setError(getErrorMessage(deleteError, "Failed to delete announcement"));
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleToggleStatus = async (item: AnnouncementItem) => {
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const nextStatus: AnnouncementStatus =
+        item.status === "published" ? "draft" : "published";
+
+      const response = await fetch(`/api/announcements/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: item.title,
+          content: item.content,
+          posterImageUrl: item.poster_image_url || "",
+          status: nextStatus,
+          targetBarangays: item.target_barangays,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || "Failed to update announcement status");
+      }
+
+      setMessage(
+        nextStatus === "published"
+          ? "Announcement published."
+          : "Announcement reverted to draft.",
+      );
+      await loadData();
+    } catch (statusError: unknown) {
+      setError(getErrorMessage(statusError, "Failed to update announcement status"));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -559,13 +633,63 @@ export function AnnouncementManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Total</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{announcementSummary.total}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Published</p>
+              <p className="text-2xl font-bold text-emerald-700">{announcementSummary.published}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Drafts</p>
+              <p className="text-2xl font-bold text-amber-700">{announcementSummary.drafts}</p>
+            </div>
+          </div>
+
+          <div className="mb-4 grid gap-3 md:grid-cols-3">
+            <Input
+              value={listSearch}
+              placeholder="Search title or content"
+              onChange={(event) => setListSearch(event.target.value)}
+            />
+
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={listStatus}
+              onChange={(event) =>
+                setListStatus(event.target.value as "all" | AnnouncementStatus)
+              }
+            >
+              <option value="all">All Status</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={listBarangay || "__all"}
+              onChange={(event) =>
+                setListBarangay(event.target.value === "__all" ? "" : event.target.value)
+              }
+            >
+              <option value="__all">All Barangays</option>
+              {barangays.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {loading ? (
             <p className="text-sm text-slate-500">Loading announcements...</p>
-          ) : announcements.length === 0 ? (
+          ) : filteredAnnouncements.length === 0 ? (
             <p className="text-sm text-slate-500">No announcements yet.</p>
           ) : (
             <div className="space-y-3">
-              {announcements.map((item) => (
+              {filteredAnnouncements.map((item) => (
                 <div
                   key={item.id}
                   className="rounded-lg border p-4 space-y-3 bg-white dark:bg-slate-900"
@@ -618,6 +742,14 @@ export function AnnouncementManagement() {
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                       Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleStatus(item)}
+                      disabled={saving}
+                    >
+                      {item.status === "published" ? "Unpublish" : "Publish"}
                     </Button>
                     <Button
                       variant="outline"

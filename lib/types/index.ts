@@ -4,11 +4,11 @@
 
 export type UserRole =
   | "staff"
+  | "barangay"
   | "residence"
   | "workers"
   | "user"
-  | "admin"
-  | "barangay_admin";
+  | "admin";
 
 export interface User {
   id: string;
@@ -101,6 +101,10 @@ export interface HealthFacility {
   specialized_services?: string;
   service_capability?: string;
   yakap_accredited?: boolean;
+  is_active?: boolean;
+  deactivated_at?: string | null;
+  deactivated_by?: string | null;
+  deactivation_reason?: string | null;
   created_at?: string;
   updated_at?: string;
 }

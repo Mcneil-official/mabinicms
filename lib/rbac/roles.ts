@@ -5,13 +5,13 @@
 
 export enum RoleType {
   ADMIN = "admin",
-  BARANGAY_HEALTH = "barangay_admin",
+  BARANGAY_HEALTH = "staff",
   WORK_HEALTH = "workers",
 }
 
 export enum RoleLabel {
   ADMIN = "System Administrator",
-  BARANGAY_HEALTH = "Barangay Health Officer",
+  BARANGAY_HEALTH = "Barangay Health Staff",
   WORK_HEALTH = "Health Worker",
 }
 
@@ -71,9 +71,9 @@ export function isValidRole(role: unknown): role is RoleType {
 export function dbRoleToRoleType(dbRole: string): RoleType | null {
   const mapping: Record<string, RoleType> = {
     admin: RoleType.ADMIN,
-    barangay_admin: RoleType.BARANGAY_HEALTH,
     workers: RoleType.WORK_HEALTH,
-    staff: RoleType.BARANGAY_HEALTH, // Map staff to barangay health for backward compatibility
+    staff: RoleType.BARANGAY_HEALTH,
+    barangay_admin: RoleType.BARANGAY_HEALTH, // Legacy role value support
     user: RoleType.WORK_HEALTH, // Map user to work health for backward compatibility
   };
   return mapping[dbRole] || null;

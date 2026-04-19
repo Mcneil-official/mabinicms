@@ -6,8 +6,8 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getSession();
 
-    // Only staff and admins can update yakap status
-    if (!session || !["admin", "barangay_admin"].includes(session.user.role)) {
+    // Only admins can update YAKAP status
+    if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

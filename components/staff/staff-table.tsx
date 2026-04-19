@@ -51,10 +51,10 @@ const roleColors: Record<string, { bg: string; text: string; label: string }> =
       text: "text-red-700 dark:text-red-200",
       label: "Administrator",
     },
-    barangay_admin: {
+    staff: {
       bg: "bg-blue-50 dark:bg-blue-950",
       text: "text-blue-700 dark:text-blue-200",
-      label: "Barangay Admin",
+      label: "Staff",
     },
     user: {
       bg: "bg-green-50 dark:bg-green-950",
@@ -94,7 +94,7 @@ export function StaffTable({
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="admin">Administrator</SelectItem>
-            <SelectItem value="barangay_admin">Barangay Admin</SelectItem>
+            <SelectItem value="staff">Staff</SelectItem>
             <SelectItem value="user">Health Worker</SelectItem>
           </SelectContent>
         </Select>

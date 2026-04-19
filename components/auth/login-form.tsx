@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,7 @@ export function LoginForm() {
       }
 
       // If we reach here, redirect happened in Server Action
-      router.push("/dashboard");
+      router.push("/dashboard-barangay");
     } catch (err) {
       setError("An unexpected error occurred");
       setIsPending(false);
@@ -61,7 +62,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-blue-200/70 bg-white/95 shadow-sm dark:border-blue-900/50 dark:bg-slate-950/95">
       <CardHeader>
         <CardTitle className="text-2xl">Barangay Health Dashboard</CardTitle>
         <CardDescription>Sign in with your staff credentials</CardDescription>
@@ -141,7 +142,7 @@ export function LoginForm() {
           </form>
         </Form>
 
-        <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
           <p>For staff and health workers only</p>
           <p>Internal use — MabiniCare</p>
         </div>

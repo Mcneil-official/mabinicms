@@ -1,160 +1,154 @@
 import Link from "next/link";
-import {
-  Activity,
-  Building2,
-  ClipboardList,
-  Database,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import Image from "next/image";
+import { ShieldCheck } from "lucide-react";
 
-const highlights = [
-  {
-    title: "Barangay Profiling",
-    description:
-      "Manage resident and family profiles in one structured system.",
-    icon: Users,
-  },
-  {
-    title: "Health Program Tracking",
-    description:
-      "Track consultations, medications, announcements, and outcomes in one dashboard.",
-    icon: Activity,
-  },
-  {
-    title: "YAKAP Services",
-    description:
-      "Support pregnancy and community care programs with structured data workflows.",
-    icon: ClipboardList,
-  },
-  {
-    title: "Secure Data Operations",
-    description:
-      "Protect records through role-based access and accountable submissions.",
-    icon: ShieldCheck,
-  },
+const chips = [
+  "Resident-Centered Care",
+  "Connected Barangay Workflows",
+  "Secure Health Data",
 ];
 
-const quickStats = [
-  { label: "Active Modules", value: "10+" },
-  { label: "Workflow Model", value: "Centralized" },
-  { label: "Availability", value: "24/7" },
+const aboutParagraphs = [
+  "MABINICARE is a community-focused health information system designed to modernize how local health services are delivered, tracked, and improved. It gives municipal and barangay teams a shared digital workspace for patient records, field activities, and program updates.",
+  "By replacing disconnected files and manual logs, the platform creates a seamless workflow from data entry to reporting. Health workers spend less time searching for records and more time supporting residents, planning interventions, and responding to urgent needs.",
+  "Beyond daily operations, MABINICARE supports stronger long-term public health governance through secure access controls, consistent data structure, and decision-ready reporting at both barangay and municipal levels.",
 ];
 
 export default function Page() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="relative min-h-screen overflow-hidden bg-slate-100 text-slate-900">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(37,99,235,0.075) 1px, transparent 1px), linear-gradient(to bottom, rgba(37,99,235,0.075) 1px, transparent 1px)",
+          backgroundSize: "36px 36px",
+        }}
+      />
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-chart-2/15 blur-3xl" />
-        <div className="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-chart-1/15 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-blue-300/20 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-indigo-200/30 blur-3xl" />
       </div>
 
-      <section className="relative mx-auto flex w-full max-w-7xl flex-col px-6 pb-16 pt-10 sm:px-10 lg:px-16">
-        <header className="mb-14 flex items-center justify-between rounded-2xl border border-border/70 bg-card/80 px-5 py-4 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Building2 className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Municipal Health Platform
-              </p>
-              <h1 className="text-lg font-bold sm:text-xl">MabiniCare</h1>
+      <section className="relative mx-auto w-full max-w-7xl px-6 pb-12 pt-8 sm:px-10 lg:px-16">
+        <header className="mb-10 rounded-2xl border border-blue-200/70 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/mabini-logo.png"
+                alt="MabiniCare official logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full border border-blue-200 bg-white object-cover"
+                priority
+              />
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700/80">
+                  MUNICIPAL HEALTH PLATFORM
+                </p>
+                <h1 className="text-xl font-bold leading-tight">MabiniCare</h1>
+              </div>
             </div>
-          </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <Link
-              href="/auth/login"
-              className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
-            >
-              Barangay Staff Login
-            </Link>
-            <Link
-              href="/auth/workers"
-              className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
-            >
-              City Worker Login
-            </Link>
-            <Link
-              href="/auth/admin"
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              Admin Login
-            </Link>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/auth/login"
+                className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+              >
+                Barangay Staff Login
+              </Link>
+              <Link
+                href="/auth/workers"
+                className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+              >
+                City Worker Login
+              </Link>
+              <Link
+                href="/auth/admin"
+                className="rounded-full bg-blue-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-800"
+              >
+                Admin Login
+              </Link>
+            </div>
           </div>
         </header>
 
-        <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <p className="mb-4 inline-flex items-center rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-secondary-foreground">
-              Official Access Page
-            </p>
-            <h2 className="max-w-2xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              One Health Data System for Every Barangay.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              MabiniCare centralizes profiling, monitoring, and reporting for
-              barangay health services. Built for administrators and field
-              workers, it keeps records organized and ready for action.
-            </p>
-
-            <div className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
-              {quickStats.map((stat) => (
-                <article
-                  key={stat.label}
-                  className="rounded-2xl border border-border/70 bg-card/80 px-4 py-4"
-                >
-                  <p className="text-xl font-extrabold tracking-tight">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <aside className="relative rounded-3xl border border-border/80 bg-card/90 p-6 shadow-2xl shadow-primary/10 backdrop-blur">
-            <div className="absolute -right-3 -top-3 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Live Modules
-            </div>
-            <div className="mb-6 flex items-center gap-2">
-              <Database className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-bold">System Coverage</h3>
-            </div>
-            <div className="space-y-4">
-              {highlights.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <article
-                    key={item.title}
-                    className="rounded-2xl border border-border/70 bg-background/70 p-4 transition hover:bg-muted/70"
-                  >
-                    <div className="mb-3 flex items-center gap-2">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      <h4 className="font-semibold">{item.title}</h4>
-                    </div>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </aside>
-        </div>
-
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
-          <p>
-            MabiniCare Community Health Management System • Barangay Health
-            Operations
+        <section className="mb-10">
+          <p className="mb-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+            OFFICIAL ACCESS PAGE
           </p>
-          <p className="font-medium text-foreground">Version 1.0</p>
-        </div>
+
+          <h2 className="max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            Modern Health Operations for Every Barangay.
+          </h2>
+
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-slate-600 sm:text-lg">
+            MabiniCare centralizes profiling, monitoring, and reporting for barangay health services. Built for admins and field workers, it keeps records organized and actionable.
+          </p>
+
+          <div className="mt-7 flex flex-wrap gap-2">
+            {chips.map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-blue-200/70 bg-white/95 p-6 shadow-sm backdrop-blur sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                ABOUT MABINICARE
+              </p>
+              <h3 className="mb-6 text-4xl font-black leading-tight tracking-tight text-slate-900">
+                A digital public health platform for the Municipality of Mabini.
+              </h3>
+
+              <div className="space-y-6 text-sm leading-8 text-slate-600">
+                {aboutParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+
+            <aside className="rounded-3xl border border-blue-200/80 bg-blue-50/60 p-6">
+              <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                <ShieldCheck className="h-4 w-4" />
+                BUILT FOR PUBLIC SERVICE
+              </p>
+
+              <p className="mb-6 text-sm leading-7 text-slate-600">
+                Purpose-built for local government health operations in Mabini, with a strong focus on coordination, continuity of care, and accountable data management.
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="text-2xl font-black leading-none text-slate-900">24/7</p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    SYSTEM ACCESS
+                  </p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="text-2xl font-black leading-none text-slate-900">10+</p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    CORE MODULES
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <footer className="mt-6 rounded-xl border border-blue-200/70 bg-white/90 px-4 py-3 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p>MabiniCare | Barangay Health Operations</p>
+            <p className="font-medium text-slate-700">Version 1.0</p>
+          </div>
+        </footer>
       </section>
     </main>
   );

@@ -8,14 +8,14 @@ import { z } from "zod";
 const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["user", "admin", "barangay_admin"]),
+  role: z.enum(["user", "staff", "workers", "admin"]),
   assigned_barangay: z.string().min(1, "Barangay is required"),
 });
 
 const updateUserSchema = z.object({
   id: z.string().uuid(),
   username: z.string().min(3).optional(),
-  role: z.enum(["user", "admin", "barangay_admin"]).optional(),
+  role: z.enum(["user", "staff", "workers", "admin"]).optional(),
   assigned_barangay: z.string().min(1).optional(),
 });
 

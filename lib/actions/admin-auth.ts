@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient, setSession } from "@/lib/auth";
 import { loginSchema } from "@/lib/schemas/auth";
-import type { Session } from "@/lib/types";
+import type { Session, UserRole } from "@/lib/types";
 import bcrypt from "bcryptjs";
 
 /**
@@ -20,6 +20,8 @@ export async function adminLoginAction(formData: {
   }
 
   const { username, password } = validation.data;
+
+  let shouldRedirect = false;
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -40,13 +42,16 @@ export async function adminLoginAction(formData: {
       return { success: false, error: "Invalid admin credentials" };
     }
 
+    // user_role is the source of truth for portal authorization
+    const normalizedRole = "admin" as UserRole;
+
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
     const session: Session = {
       user: {
         id: user.id,
         username: user.username,
-        role: user.user_role,
+        role: normalizedRole,
         assigned_barangay: user.assigned_barangay,
         created_at: user.created_at,
         updated_at: user.updated_at,
@@ -55,11 +60,17 @@ export async function adminLoginAction(formData: {
     };
 
     await setSession(session);
-    redirect("/dashboard");
+    shouldRedirect = true;
   } catch (error) {
     console.error("[adminLoginAction]", error);
     return { success: false, error: "An error occurred. Please try again." };
   }
+
+  if (shouldRedirect) {
+    redirect("/dashboard-admin");
+  }
+
+  return { success: true };
 }
 
 /**

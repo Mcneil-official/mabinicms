@@ -9,81 +9,93 @@ import { getSession } from "@/lib/auth";
  */
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
   const role = (value?: string) => (value || "").trim().toLowerCase();
+  const isStaffRole = (value: string) => value === "staff" || value === "barangay";
+  const getLoginPathForRequest = () => {
+    if (pathname.startsWith("/dashboard-admin")) {
+      return "/auth/admin";
+    }
 
-  // Protected routes
+    if (pathname.startsWith("/dashboard-workers")) {
+      return "/auth/workers";
+    }
+
+    return "/auth/login";
+  };
+
   const isProtectedRoute =
     pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard");
 
-  // Public routes that don't require auth
-  const isPublicRoute = pathname.startsWith("/auth") || pathname === "/";
+  if (!isProtectedRoute) {
+    return NextResponse.next();
+  }
 
-  if (isProtectedRoute) {
-    const session = await getSession();
+  const session = await getSession();
 
-    if (!session) {
-      // Redirect to login page
-      const loginUrl = new URL("/auth/login", request.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  if (!session) {
+    return NextResponse.redirect(new URL(getLoginPathForRequest(), request.url));
+  }
 
-    // Check if session has expired
-    if (session.expires_at < Date.now()) {
-      const loginUrl = new URL("/auth/login", request.url);
-      const response = NextResponse.redirect(loginUrl);
-      // Clear expired session
-      response.cookies.delete("session");
-      return response;
-    }
+  if (session.expires_at < Date.now()) {
+    const response = NextResponse.redirect(
+      new URL(getLoginPathForRequest(), request.url),
+    );
+    response.cookies.delete("session");
+    return response;
+  }
 
-    const userRole = role(session.user.role);
+  const userRole = role(session.user.role);
 
-    // Role-based route protection: workers vs LGU dashboard separation
-    const isWorkerDashboard = pathname.startsWith("/dashboard-workers");
-    const isLguDashboard = pathname.startsWith("/dashboard") && !isWorkerDashboard;
+  if (!["admin", "workers", "staff", "barangay"].includes(userRole)) {
+    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    response.cookies.delete("session");
+    return response;
+  }
 
-    // Workers must use /dashboard-workers, not /dashboard
-    if (isLguDashboard && userRole === "workers") {
+  const isWorkerDashboard = pathname.startsWith("/dashboard-workers");
+  const isAdminDashboard = pathname.startsWith("/dashboard-admin");
+  const isStaffDashboard = pathname.startsWith("/dashboard-barangay");
+  const isLegacyStaffDashboard =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const isLegacyStaffApi =
+    pathname === "/api/dashboard" || pathname.startsWith("/api/dashboard/");
+
+  if (isLegacyStaffApi) {
+    const suffix = pathname.slice("/api/dashboard".length);
+    return NextResponse.redirect(
+      new URL(`/api/dashboard-barangay${suffix}`, request.url),
+    );
+  }
+
+  if (isLegacyStaffDashboard) {
+    const suffix = pathname.slice("/dashboard".length);
+
+    if (userRole === "workers") {
       return NextResponse.redirect(new URL("/dashboard-workers", request.url));
     }
 
-    // LGU users (non-workers) must use /dashboard, not /dashboard-workers
-    if (isWorkerDashboard && userRole !== "workers") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (userRole === "admin") {
+      return NextResponse.redirect(new URL("/dashboard-admin", request.url));
     }
 
-    // Route workers away from staff/CHO dashboards
-    if (pathname.startsWith("/dashboard-barangay") && userRole !== "barangay_admin" && userRole !== "staff") {
-      const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard";
-      return NextResponse.redirect(new URL(target, request.url));
-    }
+    return NextResponse.redirect(
+      new URL(`/dashboard-barangay${suffix}`, request.url),
+    );
+  }
 
-    if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
-      if (userRole === "workers") {
-        return NextResponse.redirect(new URL("/dashboard-workers", request.url));
-      }
-    }
+  if (isWorkerDashboard && userRole !== "workers") {
+    const target = userRole === "admin" ? "/dashboard-admin" : "/dashboard-barangay";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
 
-    // Sub-route protection
-    const healthWorkerRoute = pathname.startsWith("/dashboard/health-workers");
-    const staffRoute = pathname.startsWith("/dashboard/staff");
+  if (isAdminDashboard && userRole !== "admin") {
+    const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard-barangay";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
 
-    if (healthWorkerRoute && userRole !== "workers") {
-      // Non-health workers trying to access health worker routes
-      const approporiateRoute =
-        userRole === "staff" || userRole === "barangay_admin" ? "/dashboard" : "/dashboard";
-      return NextResponse.redirect(new URL(approporiateRoute, request.url));
-    }
-
-    if (staffRoute && userRole !== "staff" && userRole !== "admin" && userRole !== "barangay_admin") {
-      // Non-staff trying to access staff routes
-      const appropriateRoute =
-        userRole === "workers"
-          ? "/dashboard/health-workers"
-          : "/dashboard";
-      return NextResponse.redirect(new URL(appropriateRoute, request.url));
-    }
+  if (isStaffDashboard && !isStaffRole(userRole)) {
+    const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard-admin";
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   return NextResponse.next();

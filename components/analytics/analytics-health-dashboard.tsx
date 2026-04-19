@@ -54,7 +54,7 @@ type TrendItem = {
   priorityServices: number;
 };
 
-type DashboardData = {
+export type DashboardData = {
   barangay: string;
   generatedAt: string;
   kpis: {
@@ -92,17 +92,19 @@ interface AnalyticsHealthDashboardProps {
   endpoint: string;
   title?: string;
   subtitle?: string;
+  initialData?: DashboardData | null;
 }
 
 export function AnalyticsHealthDashboard({
   endpoint,
   title = "Analytics & Health Indicators",
   subtitle,
+  initialData = null,
 }: AnalyticsHealthDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardData | null>(initialData);
 
   const loadDashboard = useCallback(
     async (isRefresh = false) => {
@@ -139,14 +141,25 @@ export function AnalyticsHealthDashboard({
   );
 
   useEffect(() => {
-    loadDashboard();
+    if (initialData) {
+      setData(initialData);
+      setLoading(false);
+    } else {
+      loadDashboard();
+    }
 
     const interval = setInterval(() => {
       loadDashboard(true);
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [loadDashboard]);
+  }, [initialData, loadDashboard]);
+
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+    }
+  }, [initialData]);
 
   const generatedAtLabel = useMemo(() => {
     if (!data?.generatedAt) return "";

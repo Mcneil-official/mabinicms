@@ -208,9 +208,7 @@ export function EditStaffDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Health Worker (BHW)</SelectItem>
-                    <SelectItem value="barangay_admin">
-                      Barangay Administrator
-                    </SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
                     <SelectItem value="admin">System Administrator</SelectItem>
                   </SelectContent>
                 </Select>
