@@ -64,16 +64,6 @@ export function LoginForm() {
   return (
     <Card className="w-full border-blue-200/70 bg-white/95 shadow-sm dark:border-blue-900/50 dark:bg-slate-950/95">
       <CardHeader>
-        <div className="mb-3 flex items-center justify-center">
-          <Image
-            src="/mabini-logo.png"
-            alt="MabiniCare official logo"
-            width={62}
-            height={62}
-            className="h-[62px] w-[62px] rounded-full border border-blue-200 bg-white object-cover"
-            priority
-          />
-        </div>
         <CardTitle className="text-2xl">Barangay Health Dashboard</CardTitle>
         <CardDescription>Sign in with your staff credentials</CardDescription>
       </CardHeader>

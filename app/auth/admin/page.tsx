@@ -33,16 +33,6 @@ export default async function AdminLoginPage() {
           </Button>
         </div>
         <div className="mb-8 text-center">
-          <div className="mb-3 flex justify-center">
-            <Image
-              src="/mabini-logo.png"
-              alt="MabiniCare official logo"
-              width={44}
-              height={44}
-              className="h-11 w-11 rounded-full border border-blue-200 bg-white object-cover"
-              priority
-            />
-          </div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
               MabiniCare Admin Portal
             </h1>
