@@ -150,6 +150,9 @@ export function MedicationInventoryModule({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [medicationForm, setMedicationForm] = useState(initialMedicationForm);
   const [distributionForm, setDistributionForm] = useState(initialDistributionForm);
+  const [inventorySearch, setInventorySearch] = useState("");
+  const [alertSeverityFilter, setAlertSeverityFilter] = useState<"all" | "warning" | "critical">("all");
+  const [historyActionFilter, setHistoryActionFilter] = useState<"all" | DistributionAction>("all");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -242,6 +245,66 @@ export function MedicationInventoryModule({
       })),
     [items],
   );
+
+  const filteredAlerts = useMemo(() => {
+    if (alertSeverityFilter === "all") return alerts;
+    return alerts.filter((item) => item.severity === alertSeverityFilter);
+  }, [alerts, alertSeverityFilter]);
+
+  const filteredItems = useMemo(() => {
+    if (!inventorySearch) return items;
+    const keyword = inventorySearch.toLowerCase();
+    return items.filter((item) =>
+      `${item.medicine_name} ${item.category} ${item.batch_number}`
+        .toLowerCase()
+        .includes(keyword),
+    );
+  }, [items, inventorySearch]);
+
+  const filteredHistory = useMemo(() => {
+    if (historyActionFilter === "all") return history;
+    return history.filter((item) => item.action_type === historyActionFilter);
+  }, [history, historyActionFilter]);
+
+  const handleExportHistory = () => {
+    if (filteredHistory.length === 0) {
+      setError("No history rows available for export.");
+      return;
+    }
+
+    const headers = ["Date", "Medication", "Action", "Quantity", "Location", "Notes"];
+    const rows = filteredHistory.map((record) => {
+      const location =
+        record.barangay ||
+        (record.from_barangay && record.to_barangay
+          ? `${record.from_barangay} -> ${record.to_barangay}`
+          : "-");
+
+      return [
+        formatDate(record.created_at),
+        `${record.medicine_name || "Medication"}${record.batch_number ? ` (${record.batch_number})` : ""}`,
+        record.action_type,
+        String(record.quantity),
+        location,
+        record.notes || "",
+      ];
+    });
+
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `medication-history-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  };
 
   const resetMedicationForm = () => {
     setMedicationForm(initialMedicationForm);
@@ -448,12 +511,30 @@ export function MedicationInventoryModule({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {alerts.length === 0 ? (
+            <div className="pb-2">
+              <Select
+                value={alertSeverityFilter}
+                onValueChange={(value: "all" | "warning" | "critical") =>
+                  setAlertSeverityFilter(value)
+                }
+              >
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Severity</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {filteredAlerts.length === 0 ? (
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 No active alerts.
               </p>
             ) : (
-              alerts.slice(0, 8).map((alert) => (
+              filteredAlerts.slice(0, 8).map((alert) => (
                 <div key={`${alert.medication_id}-${alert.type}-${alert.message}`} className="flex items-start gap-2">
                   <Badge variant={alert.severity === "critical" ? "destructive" : "secondary"}>
                     {alert.severity}
@@ -764,6 +845,14 @@ export function MedicationInventoryModule({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="pb-4">
+            <Input
+              value={inventorySearch}
+              onChange={(event) => setInventorySearch(event.target.value)}
+              placeholder="Search medicine, category, or batch"
+            />
+          </div>
+
           {loading ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading inventory...</p>
           ) : (
@@ -782,7 +871,7 @@ export function MedicationInventoryModule({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((item) => (
+                {filteredItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.medicine_name}</TableCell>
                     <TableCell>{item.category}</TableCell>
@@ -834,7 +923,7 @@ export function MedicationInventoryModule({
                   </TableRow>
                 ))}
 
-                {items.length === 0 ? (
+                {filteredItems.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={canManage ? 9 : 8}
@@ -852,10 +941,39 @@ export function MedicationInventoryModule({
 
       <Card>
         <CardHeader>
-          <CardTitle>Distribution History</CardTitle>
-          <CardDescription>
-            Real-time inventory actions for accountability and audit.
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle>Distribution History</CardTitle>
+              <CardDescription>
+                Real-time inventory actions for accountability and audit.
+              </CardDescription>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={historyActionFilter}
+                onValueChange={(value: "all" | DistributionAction) =>
+                  setHistoryActionFilter(value)
+                }
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="allocate">Allocate</SelectItem>
+                  <SelectItem value="dispense">Dispense</SelectItem>
+                  <SelectItem value="restock">Restock</SelectItem>
+                  <SelectItem value="redistribute">Redistribute</SelectItem>
+                  <SelectItem value="adjust">Adjust</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button type="button" variant="outline" onClick={handleExportHistory}>
+                Export CSV
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -870,7 +988,7 @@ export function MedicationInventoryModule({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {history.map((record) => (
+              {filteredHistory.map((record) => (
                 <TableRow key={record.id}>
                   <TableCell>{formatDate(record.created_at)}</TableCell>
                   <TableCell>
@@ -889,7 +1007,7 @@ export function MedicationInventoryModule({
                 </TableRow>
               ))}
 
-              {history.length === 0 ? (
+              {filteredHistory.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}

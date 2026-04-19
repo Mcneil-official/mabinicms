@@ -1,6 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { auditRecordOperation } from "@/lib/audit-logger";
+import {
+  adminDeactivateFacilitySchema,
+  adminUpsertFacilitySchema,
+} from "@/lib/schemas/admin";
 
 /**
  * Admin Single Facility API
@@ -34,11 +38,18 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { data: facility, error } = await supabase
+    const includeInactive = request.nextUrl.searchParams.get("includeInactive") === "true";
+
+    let query = supabase
       .from("health_facilities")
       .select("*")
-      .eq("id", id)
-      .single();
+      .eq("id", id);
+
+    if (!includeInactive) {
+      query = query.eq("is_active", true);
+    }
+
+    const { data: facility, error } = await query.single();
 
     if (error) throw error;
     if (!facility) {
@@ -91,8 +102,19 @@ export async function PUT(
       return NextResponse.json({ error: "Facility not found" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { name, barangay, latitude, longitude, phone, email, operating_hours, capacity } = body;
+    const parsedBody = adminUpsertFacilitySchema.safeParse(await request.json());
+
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { name, barangay, latitude, longitude, phone, email, operating_hours, capacity } = parsedBody.data;
 
     // Update facility
     const { data: updatedFacility, error } = await supabase
@@ -159,7 +181,20 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get facility before deletion
+    const parsedBody = adminDeactivateFacilitySchema.safeParse(await request.json().catch(() => ({})));
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { reason } = parsedBody.data;
+
+    // Get facility before deactivation
     const { data: facility } = await supabase
       .from("health_facilities")
       .select("*")
@@ -170,11 +205,18 @@ export async function DELETE(
       return NextResponse.json({ error: "Facility not found" }, { status: 404 });
     }
 
-    // Delete facility
-    const { error } = await supabase
+    // Soft delete facility
+    const { data: deactivatedFacility, error } = await supabase
       .from("health_facilities")
-      .delete()
-      .eq("id", id);
+      .update({
+        is_active: false,
+        deactivated_at: new Date().toISOString(),
+        deactivated_by: adminUser.id,
+        deactivation_reason: reason || null,
+      })
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) throw error;
 
@@ -185,11 +227,12 @@ export async function DELETE(
       "facility",
       id,
       facility,
-      null
+      { ...deactivatedFacility, action: "deactivated" }
     );
 
     return NextResponse.json({
-      message: "Facility deleted successfully",
+      message: "Facility deactivated successfully",
+      facility: deactivatedFacility,
     });
   } catch (error) {
     console.error("Error deleting facility:", error);

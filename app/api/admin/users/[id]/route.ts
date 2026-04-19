@@ -1,6 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { auditRecordOperation, auditAccessDenied } from "@/lib/audit-logger";
+import { auditRecordOperation } from "@/lib/audit-logger";
+import {
+  adminDeactivateUserSchema,
+  adminUpdateUserSchema,
+} from "@/lib/schemas/admin";
 
 /**
  * Admin Single User API
@@ -91,8 +95,19 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { role, assigned_barangay, is_active } = body;
+    const parsedBody = adminUpdateUserSchema.safeParse(await request.json());
+
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { role, assigned_barangay, is_active } = parsedBody.data;
 
     // Update user
     const { data: updatedUser, error } = await supabase
@@ -155,8 +170,18 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { reason } = body;
+    const parsedBody = adminDeactivateUserSchema.safeParse(await request.json());
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { reason } = parsedBody.data;
 
     // Get old values
     const { data: oldUser } = await supabase

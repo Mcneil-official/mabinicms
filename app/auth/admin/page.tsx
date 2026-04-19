@@ -13,7 +13,8 @@ import { ArrowLeft } from "lucide-react";
 export default async function AdminLoginPage() {
   // If already logged in as admin, redirect to admin dashboard
   const session = await getSession();
-  if (session && session.user.role === "admin") {
+  const role = (session?.user.role || "").trim().toLowerCase();
+  if (role === "admin") {
     redirect("/dashboard-admin");
   }
 

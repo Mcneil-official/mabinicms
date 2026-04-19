@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Shield, Trash2, Edit2, AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
 import UserDialog from "./user-dialog";
 import DeleteUserDialog from "./delete-user-dialog";
 
@@ -36,6 +36,7 @@ interface User {
 export function UsersManagementTable() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -45,13 +46,10 @@ export function UsersManagementTable() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [page, search, roleFilter, statusFilter]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "20",
@@ -61,17 +59,27 @@ export function UsersManagementTable() {
       });
 
       const response = await fetch(`/api/admin/users?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users);
-        setTotal(data.pagination.total);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to load users (${response.status})`);
       }
+
+      setUsers(data.users || []);
+      setTotal(data.pagination.total || 0);
     } catch (error) {
       console.error("Failed to fetch users:", error);
+      setUsers([]);
+      setTotal(0);
+      setLoadError(error instanceof Error ? error.message : "Failed to fetch users");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, roleFilter, statusFilter]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleUserSaved = () => {
     fetchUsers();
@@ -153,6 +161,16 @@ export function UsersManagementTable() {
       {/* Users Table */}
       <Card>
         <CardContent className="pt-6">
+          {loadError ? (
+            <div className="mb-4 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Unable to load users</p>
+                <p className="text-red-600">{loadError}</p>
+              </div>
+            </div>
+          ) : null}
+
           {loading ? (
             <div className="flex justify-center py-8">Loading users...</div>
           ) : users.length === 0 ? (

@@ -10,6 +10,18 @@ import { getSession } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const role = (value?: string) => (value || "").trim().toLowerCase();
+  const isStaffRole = (value: string) => value === "staff" || value === "barangay";
+  const getLoginPathForRequest = () => {
+    if (pathname.startsWith("/dashboard-admin")) {
+      return "/auth/admin";
+    }
+
+    if (pathname.startsWith("/dashboard-workers")) {
+      return "/auth/workers";
+    }
+
+    return "/auth/login";
+  };
 
   const isProtectedRoute =
     pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard");
@@ -21,16 +33,25 @@ export async function proxy(request: NextRequest) {
   const session = await getSession();
 
   if (!session) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL(getLoginPathForRequest(), request.url));
   }
 
   if (session.expires_at < Date.now()) {
-    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    const response = NextResponse.redirect(
+      new URL(getLoginPathForRequest(), request.url),
+    );
     response.cookies.delete("session");
     return response;
   }
 
   const userRole = role(session.user.role);
+
+  if (!["admin", "workers", "staff", "barangay"].includes(userRole)) {
+    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    response.cookies.delete("session");
+    return response;
+  }
+
   const isWorkerDashboard = pathname.startsWith("/dashboard-workers");
   const isAdminDashboard = pathname.startsWith("/dashboard-admin");
   const isStaffDashboard = pathname.startsWith("/dashboard-barangay");
@@ -72,7 +93,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
-  if (isStaffDashboard && userRole !== "staff") {
+  if (isStaffDashboard && !isStaffRole(userRole)) {
     const target = userRole === "workers" ? "/dashboard-workers" : "/dashboard-admin";
     return NextResponse.redirect(new URL(target, request.url));
   }

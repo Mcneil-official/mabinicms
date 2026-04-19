@@ -7,7 +7,7 @@ import {
 } from "@/lib/queries/medications";
 
 function canManage(role: string) {
-  return role === "workers" || role === "staff";
+  return role === "workers" || role === "staff" || role === "admin";
 }
 
 function normalizeBarangay(value: string) {

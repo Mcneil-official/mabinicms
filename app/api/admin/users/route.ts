@@ -2,6 +2,12 @@
 import { createServerSupabaseClient } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { auditRecordOperation } from "@/lib/audit-logger";
+import { requireRole } from "@/lib/api-authorization";
+import { RoleType } from "@/lib/rbac/roles";
+import {
+  adminCreateUserSchema,
+  adminUserListQuerySchema,
+} from "@/lib/schemas/admin";
 
 /**
  * Admin Users API
@@ -11,32 +17,35 @@ import { auditRecordOperation } from "@/lib/audit-logger";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
-    
-    // Get current user
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) {
+    const auth = await requireRole(request, RoleType.ADMIN);
+    if (!auth.authorized) {
+      return auth.error;
+    }
+
+    const session = auth.session;
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if admin
-    const { data: userData } = await supabase
-      .from("users")
-      .select("role")
-      .eq("auth_id", currentUser.id)
-      .single();
-
-    if (userData?.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const supabase = await createServerSupabaseClient();
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const search = searchParams.get("search") || "";
-    const role = searchParams.get("role") || "";
-    const status = searchParams.get("status") || "";
+    const parsedQuery = adminUserListQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries())
+    );
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid query parameters",
+          details: parsedQuery.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { page, limit, search, role, status } = parsedQuery.data;
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -86,34 +95,31 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
-    
-    // Get current user
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) {
+    const auth = await requireRole(request, RoleType.ADMIN);
+    if (!auth.authorized) {
+      return auth.error;
+    }
+
+    const session = auth.session;
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if admin
-    const { data: userData } = await supabase
-      .from("users")
-      .select("id, role")
-      .eq("auth_id", currentUser.id)
-      .single();
+    const supabase = await createServerSupabaseClient();
 
-    if (userData?.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const parsedBody = adminCreateUserSchema.safeParse(await request.json());
 
-    const body = await request.json();
-    const { username, password, role, assigned_barangay } = body;
-
-    if (!username || !password || !role) {
+    if (!parsedBody.success) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
         { status: 400 }
       );
     }
+
+    const { username, password, role, assigned_barangay } = parsedBody.data;
 
     // Hash password
     const bcrypt = require("bcryptjs");
@@ -137,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     // Log audit
     await auditRecordOperation(
-      userData.id,
+      session.user.id,
       "create",
       "user",
       newUser.id,

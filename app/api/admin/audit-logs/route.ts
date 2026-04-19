@@ -1,5 +1,9 @@
 import { createServerSupabaseClient } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  adminAuditExportSchema,
+  adminAuditLogsQuerySchema,
+} from "@/lib/schemas/admin";
 
 type AuditLog = {
   id: string;
@@ -45,14 +49,21 @@ export async function GET(request: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const action = searchParams.get("action") || "";
-    const resourceType = searchParams.get("resourceType") || "";
-    const status = searchParams.get("status") || "";
-    const startDate = searchParams.get("startDate") || "";
-    const endDate = searchParams.get("endDate") || "";
-    const userId = searchParams.get("userId") || "";
+    const parsedQuery = adminAuditLogsQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries())
+    );
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid query parameters",
+          details: parsedQuery.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { page, limit, action, resourceType, status, startDate, endDate, userId } = parsedQuery.data;
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -136,8 +147,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { format = "json", filters = {} } = body;
+    const parsedBody = adminAuditExportSchema.safeParse(await request.json());
+
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { format, filters } = parsedBody.data;
 
     // Build query with filters
     let query = supabase

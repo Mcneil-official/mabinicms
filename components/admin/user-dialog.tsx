@@ -41,8 +41,24 @@ export default function UserDialog({ user, onSave, onClose }: UserDialogProps) {
   const [barangay, setBarangay] = useState(user?.assigned_barangay || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [barangays, setBarangays] = useState<string[]>([]);
 
   const isEditing = !!user?.id;
+
+  React.useEffect(() => {
+    const loadBarangays = async () => {
+      try {
+        const response = await fetch("/api/admin/barangays");
+        if (!response.ok) return;
+        const payload = await response.json();
+        setBarangays(payload.data || []);
+      } catch (loadError) {
+        console.error("Failed to load barangays", loadError);
+      }
+    };
+
+    loadBarangays();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,14 +113,6 @@ export default function UserDialog({ user, onSave, onClose }: UserDialogProps) {
       setLoading(false);
     }
   };
-
-  const barangays = [
-    "Barangay 1",
-    "Barangay 2",
-    "Barangay 3",
-    "Barangay 4",
-    "Barangay 5",
-  ]; // Replace with actual barangay list
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -165,12 +173,15 @@ export default function UserDialog({ user, onSave, onClose }: UserDialogProps) {
 
           <div className="space-y-2">
             <Label htmlFor="barangay">Assigned Barangay</Label>
-            <Select value={barangay} onValueChange={setBarangay}>
+            <Select
+              value={barangay || "__none"}
+              onValueChange={(value) => setBarangay(value === "__none" ? "" : value)}
+            >
               <SelectTrigger id="barangay">
                 <SelectValue placeholder="Select barangay (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="__none">None</SelectItem>
                 {barangays.map((b) => (
                   <SelectItem key={b} value={b}>
                     {b}

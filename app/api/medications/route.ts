@@ -9,7 +9,7 @@ import {
 } from "@/lib/queries/medications";
 
 function canManage(role: string) {
-  return role === "workers" || role === "staff";
+  return role === "workers" || role === "staff" || role === "admin";
 }
 
 export async function GET() {
@@ -22,7 +22,7 @@ export async function GET() {
 
     const normalizedRole = (session.user.role || "").trim().toLowerCase();
 
-    if (normalizedRole === "workers") {
+    if (normalizedRole === "workers" || normalizedRole === "admin") {
       const [data, barangays] = await Promise.all([
         getMedicationInventoryForCho(),
         getMedicationBarangays(),

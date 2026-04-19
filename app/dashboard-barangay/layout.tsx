@@ -19,16 +19,8 @@ export default async function DashboardRootLayout({
 
   const role = (session.user.role || "").trim().toLowerCase();
 
-  if (role === "workers") {
-    redirect("/dashboard-workers");
-  }
-
-  if (role === "admin") {
-    redirect("/dashboard-admin");
-  }
-
-  if (role !== "staff") {
-    redirect("/auth/login");
+  if (role !== "staff" && role !== "barangay") {
+    redirect(role === "workers" ? "/dashboard-workers" : "/dashboard-admin");
   }
 
   return <DashboardLayout user={session.user}>{children}</DashboardLayout>;

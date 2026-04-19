@@ -18,13 +18,6 @@ export function Header({ user, sidebarOpen, onSidebarToggle }: HeaderProps) {
         <div className="flex items-center gap-4">
           <SidebarToggle isOpen={sidebarOpen} onToggle={onSidebarToggle} />
           <div className="hidden items-center gap-2 sm:flex">
-            <Image
-              src="/mabini-logo.png"
-              alt="MabiniCare official logo"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-full border border-blue-200 bg-white object-cover"
-            />
             <h1 className="text-lg font-semibold text-slate-900 dark:text-white">
               MabiniCare Dashboard
             </h1>

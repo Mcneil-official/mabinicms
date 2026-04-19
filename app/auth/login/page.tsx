@@ -15,7 +15,7 @@ export default async function StaffLoginPage() {
   const session = await getSession();
   if (session) {
     const role = (session.user.role || "").trim().toLowerCase();
-    if (role === "staff") {
+    if (role === "staff" || role === "barangay") {
       redirect("/dashboard-barangay");
     }
 

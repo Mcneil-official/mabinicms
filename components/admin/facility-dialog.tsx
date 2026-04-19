@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -49,8 +49,24 @@ export default function FacilityDialog({ facility, onSave, onClose }: FacilityDi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [geoError, setGeoError] = useState("");
+  const [barangays, setBarangays] = useState<string[]>([]);
 
   const isEditing = !!facility?.id;
+
+  useEffect(() => {
+    const loadBarangays = async () => {
+      try {
+        const response = await fetch("/api/admin/barangays");
+        if (!response.ok) return;
+        const payload = await response.json();
+        setBarangays(payload.data || []);
+      } catch (loadError) {
+        console.error("Failed to load barangays", loadError);
+      }
+    };
+
+    loadBarangays();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +123,7 @@ export default function FacilityDialog({ facility, onSave, onClose }: FacilityDi
           setLongitude(position.coords.longitude.toString());
           setGeoError("");
         },
-        (err) => {
+        () => {
           setGeoError("Failed to get location. Please enter coordinates manually.");
         }
       );
@@ -115,8 +131,6 @@ export default function FacilityDialog({ facility, onSave, onClose }: FacilityDi
       setGeoError("Geolocation is not supported. Please enter coordinates manually.");
     }
   };
-
-  const barangays = ["Barangay 1", "Barangay 2", "Barangay 3", "Barangay 4", "Barangay 5"];
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -153,6 +167,9 @@ export default function FacilityDialog({ facility, onSave, onClose }: FacilityDi
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__unassigned" disabled>
+                  Select barangay
+                </SelectItem>
                 {barangays.map((b) => (
                   <SelectItem key={b} value={b}>
                     {b}

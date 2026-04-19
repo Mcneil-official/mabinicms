@@ -23,6 +23,8 @@ export async function workerLoginAction(formData: {
 
   const { username, password } = validation.data;
 
+  let shouldRedirect = false;
+
   try {
     const supabase = await createServerSupabaseClient();
 
@@ -64,12 +66,18 @@ export async function workerLoginAction(formData: {
     // Set session in httpOnly cookie
     await setSession(session);
 
-    // Redirect to workers dashboard
-    redirect("/dashboard-workers");
+    // Redirect to workers dashboard after try/catch completes
+    shouldRedirect = true;
   } catch (error) {
     console.error("[workerLoginAction]", error);
     return { success: false, error: "An error occurred. Please try again." };
   }
+
+  if (shouldRedirect) {
+    redirect("/dashboard-workers");
+  }
+
+  return { success: true };
 }
 
 /**

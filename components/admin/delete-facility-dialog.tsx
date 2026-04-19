@@ -30,6 +30,7 @@ export default function DeleteFacilityDialog({
 }: DeleteFacilityDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [reason, setReason] = useState("");
 
   const handleDelete = async () => {
     try {
@@ -37,6 +38,7 @@ export default function DeleteFacilityDialog({
       const response = await fetch(`/api/admin/facilities/${facility.id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reason.trim() || undefined }),
       });
 
       if (!response.ok) {
@@ -58,13 +60,20 @@ export default function DeleteFacilityDialog({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-red-600" />
-            Delete Facility
+            Deactivate Facility
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <strong>{facility.name}</strong>? This action cannot
-            be undone.
+            Are you sure you want to deactivate <strong>{facility.name}</strong>? The facility
+            will be hidden from active operations but can be audited later.
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        <textarea
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          placeholder="Reason (optional)"
+          className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
 
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
@@ -78,7 +87,7 @@ export default function DeleteFacilityDialog({
           disabled={loading}
           className="bg-red-600 hover:bg-red-700"
         >
-          {loading ? "Deleting..." : "Delete Facility"}
+          {loading ? "Deactivating..." : "Deactivate Facility"}
         </AlertDialogAction>
       </AlertDialogContent>
     </AlertDialog>

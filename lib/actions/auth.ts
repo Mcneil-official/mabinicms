@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient, setSession } from "@/lib/auth";
 import { loginSchema } from "@/lib/schemas/auth";
-import type { Session } from "@/lib/types";
+import type { Session, UserRole } from "@/lib/types";
 import bcrypt from "bcryptjs";
 
 /**
@@ -22,6 +22,8 @@ export async function loginAction(formData: {
   }
 
   const { username, password } = validation.data;
+
+  let redirectPath: string | null = null;
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -47,6 +49,9 @@ export async function loginAction(formData: {
     }
 
     const role = (user.user_role || "").trim().toLowerCase();
+    const normalizedRole = String(user.user_role || user.role || role)
+      .trim()
+      .toLowerCase() as UserRole;
 
     // Workers are not allowed to log in from the Barangay Health staff portal.
     if (role === "workers") {
@@ -63,7 +68,7 @@ export async function loginAction(formData: {
       user: {
         id: user.id,
         username: user.username,
-        role: user.user_role,
+        role: normalizedRole,
         assigned_barangay: user.assigned_barangay,
         created_at: user.created_at,
         updated_at: user.updated_at,
@@ -74,27 +79,28 @@ export async function loginAction(formData: {
     // Set session in httpOnly cookie
     await setSession(session);
 
-    // Redirect to role-specific dashboards
-    if (role === "workers") {
-      redirect("/dashboard-workers");
+    if (normalizedRole === "workers") {
+      redirectPath = "/dashboard-workers";
+    } else if (normalizedRole === "staff" || normalizedRole === "barangay") {
+      redirectPath = "/dashboard-barangay";
+    } else if (normalizedRole === "admin") {
+      redirectPath = "/dashboard-admin";
+    } else {
+      return {
+        success: false,
+        error: "Account role is not allowed to access this portal.",
+      };
     }
-
-    if (role === "staff") {
-      redirect("/dashboard-barangay");
-    }
-
-    if (role === "admin") {
-      redirect("/dashboard-admin");
-    }
-
-    return {
-      success: false,
-      error: "Account role is not allowed to access this portal.",
-    };
   } catch (error) {
     console.error("[loginAction]", error);
     return { success: false, error: "An error occurred. Please try again." };
   }
+
+  if (redirectPath) {
+    redirect(redirectPath);
+  }
+
+  return { success: true };
 }
 
 /**

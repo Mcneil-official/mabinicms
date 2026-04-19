@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth";
 import { performMedicationDistribution } from "@/lib/queries/medications";
 
 function canManage(role: string) {
-  return role === "workers";
+  return role === "workers" || role === "admin";
 }
 
 export async function POST(request: NextRequest) {

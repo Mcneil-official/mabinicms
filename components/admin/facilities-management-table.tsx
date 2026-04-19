@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useCallback, useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,16 +42,13 @@ export function FacilitiesManagementTable() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [barangay, setBarangay] = useState("");
+  const [barangays, setBarangays] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [deletingFacility, setDeletingFacility] = useState<Facility | null>(null);
 
-  useEffect(() => {
-    fetchFacilities();
-  }, [page, search, barangay]);
-
-  const fetchFacilities = async () => {
+  const fetchFacilities = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -72,7 +69,26 @@ export function FacilitiesManagementTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, barangay]);
+
+  useEffect(() => {
+    fetchFacilities();
+  }, [fetchFacilities]);
+
+  useEffect(() => {
+    const loadBarangays = async () => {
+      try {
+        const response = await fetch("/api/admin/barangays");
+        if (!response.ok) return;
+        const payload = await response.json();
+        setBarangays(payload.data || []);
+      } catch (loadError) {
+        console.error("Failed to load barangays", loadError);
+      }
+    };
+
+    loadBarangays();
+  }, []);
 
   const handleFacilitySaved = () => {
     fetchFacilities();
@@ -115,17 +131,23 @@ export function FacilitiesManagementTable() {
               }}
               className="flex-1 min-w-[200px]"
             />
-            <Select value={barangay} onValueChange={(b) => { setBarangay(b); setPage(1); }}>
+            <Select
+              value={barangay || "__all"}
+              onValueChange={(b) => {
+                setBarangay(b === "__all" ? "" : b);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="All Barangays" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Barangays</SelectItem>
-                <SelectItem value="Barangay 1">Barangay 1</SelectItem>
-                <SelectItem value="Barangay 2">Barangay 2</SelectItem>
-                <SelectItem value="Barangay 3">Barangay 3</SelectItem>
-                <SelectItem value="Barangay 4">Barangay 4</SelectItem>
-                <SelectItem value="Barangay 5">Barangay 5</SelectItem>
+                <SelectItem value="__all">All Barangays</SelectItem>
+                {barangays.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

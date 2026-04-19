@@ -1,6 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { auditRecordOperation } from "@/lib/audit-logger";
+import {
+  adminFacilitiesListQuerySchema,
+  adminUpsertFacilitySchema,
+} from "@/lib/schemas/admin";
 
 /**
  * Admin Health Facilities API
@@ -31,10 +35,21 @@ export async function GET(request: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const search = searchParams.get("search") || "";
-    const barangay = searchParams.get("barangay") || "";
+    const parsedQuery = adminFacilitiesListQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries())
+    );
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid query parameters",
+          details: parsedQuery.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { page, limit, search, barangay, status } = parsedQuery.data;
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -50,6 +65,12 @@ export async function GET(request: NextRequest) {
 
     if (barangay) {
       query = query.eq("barangay", barangay);
+    }
+
+    if (status === "active") {
+      query = query.eq("is_active", true);
+    } else if (status === "inactive") {
+      query = query.eq("is_active", false);
     }
 
     const { data: facilities, count, error } = await query
@@ -97,15 +118,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { name, barangay, latitude, longitude, phone, email, operating_hours, capacity } = body;
+    const parsedBody = adminUpsertFacilitySchema.safeParse(await request.json());
 
-    if (!name || !barangay || latitude === undefined || longitude === undefined) {
+    if (!parsedBody.success) {
       return NextResponse.json(
-        { error: "Missing required fields: name, barangay, latitude, longitude" },
+        {
+          error: "Invalid request body",
+          details: parsedBody.error.flatten(),
+        },
         { status: 400 }
       );
     }
+
+    const { name, barangay, latitude, longitude, phone, email, operating_hours, capacity } = parsedBody.data;
 
     // Create facility
     const { data: newFacility, error } = await supabase
@@ -119,6 +144,7 @@ export async function POST(request: NextRequest) {
         email: email || null,
         operating_hours: operating_hours || { start: "08:00", end: "17:00" },
         capacity: capacity || null,
+        is_active: true,
         created_at: new Date().toISOString(),
       })
       .select()

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -15,6 +14,9 @@ import {
   Megaphone,
   Pill,
   History,
+  Settings,
+  Bell,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -88,15 +90,25 @@ const adminSections: NavSection[] = [
   },
   {
     title: "Operations",
-    items: [{ href: "/dashboard-admin/users", icon: Users, label: "Users" }],
+    items: [
+      { href: "/dashboard-admin/users", icon: Users, label: "Users" },
+      { href: "/dashboard-admin/worker-operations", icon: Activity, label: "Worker Operations" },
+      { href: "/dashboard-admin/announcements", icon: Bell, label: "Announcements" },
+    ],
   },
   {
     title: "Health Data",
-    items: [{ href: "/dashboard-admin/facilities", icon: MapPin, label: "Facilities" }],
+    items: [
+      { href: "/dashboard-admin/facilities", icon: MapPin, label: "Facilities" },
+      { href: "/dashboard-admin/medications", icon: Pill, label: "Medications" },
+    ],
   },
   {
     title: "Resources",
-    items: [{ href: "/dashboard-admin/audit-logs", icon: History, label: "Audit Logs" }],
+    items: [
+      { href: "/dashboard-admin/audit-logs", icon: History, label: "Audit Logs" },
+      { href: "/dashboard-admin/settings", icon: Settings, label: "System Settings" },
+    ],
   },
 ];
 
@@ -156,13 +168,6 @@ export function Sidebar({ user, isOpen = true, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="border-b border-blue-200/80 px-6 py-6 dark:border-blue-900/40">
           <div className="mb-2 flex items-center gap-3">
-            <Image
-              src="/mabini-logo.png"
-              alt="MabiniCare official logo"
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-full border border-blue-200 bg-white object-cover"
-            />
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               MabiniCare
             </h2>
