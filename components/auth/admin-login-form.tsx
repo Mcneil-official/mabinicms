@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
 import { adminLoginAction } from "@/lib/actions/admin-auth";
-import { AlertCircle, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export function AdminLoginForm() {
   const [isPending, setIsPending] = useState(false);
@@ -60,13 +61,22 @@ export function AdminLoginForm() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-blue-200/70 bg-white/95 shadow-sm dark:border-blue-900/50 dark:bg-slate-950/95">
       <CardHeader className="space-y-1">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+        <div className="mb-2 flex items-center justify-center">
+          <Image
+            src="/mabini-logo.png"
+            alt="MabiniCare official logo"
+            width={62}
+            height={62}
+            className="h-[62px] w-[62px] rounded-full border border-blue-200 bg-white object-cover"
+            priority
+          />
+        </div>
+        <div className="flex items-center justify-center gap-2">
           <CardTitle className="text-2xl">Admin Login</CardTitle>
         </div>
-        <CardDescription>Enter your administrator credentials</CardDescription>
+        <CardDescription className="text-center">Enter your administrator credentials</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

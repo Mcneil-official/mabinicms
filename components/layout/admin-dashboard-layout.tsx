@@ -17,7 +17,7 @@ export function AdminDashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 dark:from-slate-900 dark:to-slate-900">
       <Sidebar
         user={user}
         isOpen={sidebarOpen}

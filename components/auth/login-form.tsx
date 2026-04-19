@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -61,8 +62,18 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-blue-200/70 bg-white/95 shadow-sm dark:border-blue-900/50 dark:bg-slate-950/95">
       <CardHeader>
+        <div className="mb-3 flex items-center justify-center">
+          <Image
+            src="/mabini-logo.png"
+            alt="MabiniCare official logo"
+            width={62}
+            height={62}
+            className="h-[62px] w-[62px] rounded-full border border-blue-200 bg-white object-cover"
+            priority
+          />
+        </div>
         <CardTitle className="text-2xl">Barangay Health Dashboard</CardTitle>
         <CardDescription>Sign in with your staff credentials</CardDescription>
       </CardHeader>
@@ -141,7 +152,7 @@ export function LoginForm() {
           </form>
         </Form>
 
-        <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
           <p>For staff and health workers only</p>
           <p>Internal use — MabiniCare</p>
         </div>

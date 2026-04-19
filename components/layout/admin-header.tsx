@@ -3,6 +3,7 @@
 import { adminLogoutAction } from "@/lib/actions/admin-auth";
 import { SidebarToggle } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { LogOut } from "lucide-react";
 import type { User } from "@/lib/types";
 
@@ -18,13 +19,22 @@ export function AdminHeader({
   onSidebarToggle,
 }: AdminHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-rose-200 bg-rose-50 dark:border-rose-900/60 dark:bg-slate-950">
+    <header className="sticky top-0 z-30 border-b border-blue-200/80 bg-blue-50/60 dark:border-blue-900/50 dark:bg-slate-950">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <SidebarToggle isOpen={sidebarOpen} onToggle={onSidebarToggle} />
-          <h1 className="hidden text-lg font-semibold text-rose-900 sm:block dark:text-rose-200">
-            Admin Control Center
-          </h1>
+          <div className="hidden items-center gap-2 sm:flex">
+            <Image
+              src="/mabini-logo.png"
+              alt="MabiniCare official logo"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full border border-blue-200 bg-white object-cover"
+            />
+            <h1 className="text-lg font-semibold text-blue-900 dark:text-blue-200">
+              Admin Control Center
+            </h1>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -32,7 +42,7 @@ export function AdminHeader({
             <p className="text-sm font-medium text-slate-900 dark:text-white">
               {user.username}
             </p>
-            <p className="text-xs text-rose-700 dark:text-rose-300">Administrator</p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">Administrator</p>
           </div>
           <Button
             variant="ghost"
